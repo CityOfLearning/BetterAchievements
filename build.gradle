@@ -1,56 +1,24 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.0-SNAPSHOT'
-    }
-}
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'idea'
-
-repositories {
-    maven {
-        name = "forge"
-        url = "http://files.minecraftforge.net/maven"
-    }
-    maven { // the repo from which to get NEI and stuff
-        name 'CB Repo'
-        url "http://chickenbones.net/maven"
-    }
-    maven {
-        name "Waila Mobius Repo"
-        url "http://mobiusstrip.eu/maven"
-    }
-    ivy {
-        name 'FMP'
-        artifactPattern "http://files.minecraftforge.net/[module]/[module]-dev-[revision].[ext]"
-    }
-
+plugins {
+    id "net.minecraftforge.gradle.forge" version "2.0.2"
 }
 
-dependencies {
-    compile "codechicken:NotEnoughItems:${version_minecraft}-${version_nei}:dev"
-    compile "codechicken:CodeChickenLib:${version_minecraft}-${version_cclib}:dev"
-    compile "codechicken:CodeChickenCore:${version_minecraft}-${version_cccore}:dev"
-    //compile "mcp.mobius.waila:Waila:${waila_version}_${version_minecraft}:dev"
-
-	compile fileTree(dir: 'lib', include: '*.jar')
-}
-
+version = 1.8.0"
 group = "BetterAchievements"
 archivesBaseName = "BetterAchievements"
 
 minecraft {
-    version = "${version_minecraft}-${version_forge}"
-    mappings = "${version_mappings}"
-    runDir = "run"
-
-    replace "@MAJOR@", version_major
+    version = "1.8-11.14.4.1577"
+    runDir = "eclipse"
+    
+    // the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not allways work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+    mappings = "snapshot_20141130"
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+	
+	replace "@MAJOR@", version_major
     replace "@MINOR@", version_minor
     replace "@REVIS@", version_revis
 
@@ -58,48 +26,48 @@ minecraft {
     replaceIn "package-info.java"
 }
 
-processResources {
+configurations {
+    compile
+}
+
+dependencies {
+
+}
+
+jar {	
+	from ('src/main/java/assets'){
+    	into 'assets'
+    }
+	
+    from (sourceSets.main.output) {
+        setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
+}
+
+artifacts {
+    archives jar
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = "2.6"
+}
+
+processResources
+{
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
     from(sourceSets.main.resources.srcDirs) {
-        include '**/*.info'
-        expand 'version':"${version_major}.${version_minor}.${version_revis}", 'mcversion':version_minecraft
+        include 'mcmod.info'
+        expand 'version':project.version, 'mcversion':project.minecraft.version
     }
 
-    from(sourceSets.main.resources.srcDirs) { exclude '**/*.info' }
-}
-
-version = "${version_minecraft}-${version_major}.${version_minor}.${version_revis}"
-
-jar {
-    from "build/sources/main"
-    destinationDir = file (rootProject.getRootDir().getPath() + '/output')
-    exclude('betterachievementsdemo/**')
-}
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
-    destinationDir = file (rootProject.getRootDir().getPath() + '/output')
-    exclude('betterachievementsdemo/**')
-}
-
-task sourcesJar(type: Jar, dependsOn: 'sourceMainJava') {
-    from "build/sources/java"
-    from "build/resources/main/java"
-    classifier "sources"
-    destinationDir = file (rootProject.getRootDir().getPath() + '/output')
-}
-
-artifacts {
-    archives sourcesJar, deobfJar
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs += "src/demo/java"
-        }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
     }
 }
