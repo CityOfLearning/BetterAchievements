@@ -1,4 +1,4 @@
-# BetterAchievements [![Build Status](https://travis-ci.org/Digital-Youth-Network/BetterAchievements.svg?branch=master)](https://travis-ci.org/Digital-Youth-Network/rabbit-gui)
+# BetterAchievements [![Build Status](https://travis-ci.org/Digital-Youth-Network/BetterAchievements.svg?branch=1.8.0)](https://travis-ci.org/Digital-Youth-Network/BetterAchievements)
 An improvement to the Minecraft achievement screen
 [Screenshots](#screenshots)
 or [Imgur album](http://imgur.com/a/22tud)
