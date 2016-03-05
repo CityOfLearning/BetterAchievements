@@ -5,5 +5,8 @@ jdk:
 before_install:
  - chmod +x gradlew
 
+ notifications:
+  slack: dynminecraft:S9ZN1GrxrmZ7lLfZiaxCGYEH
+ 
 install: ./gradlew setupCIWorkspace -S
 script: ./gradlew build -S
