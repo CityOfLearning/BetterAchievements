@@ -218,7 +218,7 @@ public class ColourHelper {
 
 	/**
 	 * Tone a int colour bigger then 1 will tone up, less then 1 will tone down
-	 * 
+	 *
 	 * @param colour
 	 *            colour in int form
 	 * @param scale

@@ -7,7 +7,6 @@ import com.dyn.betterachievements.reference.MetaData;
 import com.dyn.betterachievements.reference.Reference;
 import com.dyn.betterachievements.registry.AchievementRegistry;
 
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -49,7 +48,7 @@ public class BetterAchievements {
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		this.metadata = MetaData.init(this.metadata);
+		metadata = MetaData.init(metadata);
 		proxy.initConfig(event.getSuggestedConfigurationFile());
 	}
 }

@@ -44,9 +44,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiBetterAchievements extends GuiScreen {
-	
-	public static final ResourceLocation SPRITES = new ResourceLocation(Reference.MOD_ID,
-			"textures/gui/sprites.png");
+
+	public static final ResourceLocation SPRITES = new ResourceLocation(Reference.MOD_ID, "textures/gui/sprites.png");
 	public static final ResourceLocation TABS = new ResourceLocation(Reference.MOD_ID, "textures/gui/tabs.png");
 
 	private static final int blockSize = 16, maxTabs = 9, lineSize = 12, defaultTooltipWidth = 120, arrowHeadWidth = 11,
@@ -81,36 +80,36 @@ public class GuiBetterAchievements extends GuiScreen {
 	private Achievement hoveredAchievement;
 
 	public GuiBetterAchievements(GuiScreen currentScreen, int page) {
-		this.prevScreen = currentScreen;
-		this.currentPage = page == 0 ? lastPage : page;
-		this.statFileWriter = Minecraft.getMinecraft().thePlayer.getStatFileWriter();
-		this.pause = true;
+		prevScreen = currentScreen;
+		currentPage = page == 0 ? lastPage : page;
+		statFileWriter = Minecraft.getMinecraft().thePlayer.getStatFileWriter();
+		pause = true;
 	}
 
 	@Override
 	protected void actionPerformed(GuiButton button) {
 		switch (button.id) {
 		case buttonOld:
-			this.mc.displayGuiScreen(new GuiAchievementsOld(this.prevScreen, this.statFileWriter));
+			mc.displayGuiScreen(new GuiAchievementsOld(prevScreen, statFileWriter));
 			break;
 		case buttonDone:
-			this.mc.displayGuiScreen(this.prevScreen);
+			mc.displayGuiScreen(prevScreen);
 			break;
 		case buttonPrev: // this is causing an index out of bounds error
-			int newOffset = this.tabsOffset;
+			int newOffset = tabsOffset;
 			newOffset -= maxTabs;
 			if (newOffset == -maxTabs) {
-				newOffset = this.pages.size() - ((maxTabs / 3) * 2);
+				newOffset = pages.size() - ((maxTabs / 3) * 2);
 			} else if (newOffset < 0) {
-				this.tabsOffset = 0;
+				tabsOffset = 0;
 			}
 			break;
 		case buttonNext:
-			this.tabsOffset += maxTabs;
-			if (this.tabsOffset > this.pages.size()) {
-				this.tabsOffset = 0;
-			} else if (this.tabsOffset > (this.pages.size() - ((maxTabs / 3) * 2))) {
-				this.tabsOffset = this.pages.size() - ((maxTabs / 3) * 2);
+			tabsOffset += maxTabs;
+			if (tabsOffset > pages.size()) {
+				tabsOffset = 0;
+			} else if (tabsOffset > (pages.size() - ((maxTabs / 3) * 2))) {
+				tabsOffset = pages.size() - ((maxTabs / 3) * 2);
 			}
 			break;
 		default:
@@ -120,80 +119,80 @@ public class GuiBetterAchievements extends GuiScreen {
 
 	private void doDrag(int mouseX, int mouseY) {
 		if (Mouse.isButtonDown(0)) {
-			if (this.inInnerScreen(mouseX, mouseY)) {
-				if (this.newDrag) {
-					this.newDrag = false;
+			if (inInnerScreen(mouseX, mouseY)) {
+				if (newDrag) {
+					newDrag = false;
 				} else {
-					this.xPos -= (mouseX - this.prevMouseX) * this.scale;
-					this.yPos -= (mouseY - this.prevMouseY) * this.scale;
+					xPos -= (mouseX - prevMouseX) * scale;
+					yPos -= (mouseY - prevMouseY) * scale;
 				}
 
-				this.prevMouseX = mouseX;
-				this.prevMouseY = mouseY;
+				prevMouseX = mouseX;
+				prevMouseY = mouseY;
 			}
 		} else {
-			this.newDrag = true;
+			newDrag = true;
 		}
 	}
 
 	@Override
 	public boolean doesGuiPauseGame() {
-		return this.pause;
+		return pause;
 	}
 
 	private void doTabScroll() {
 		int dWheel = Mouse.getDWheel();
 
 		if (dWheel < 0) {
-			this.tabsOffset--;
+			tabsOffset--;
 		} else if (dWheel > 0) {
-			this.tabsOffset++;
+			tabsOffset++;
 		}
 
-		if (this.tabsOffset > (this.pages.size() - ((maxTabs / 3) * 2))) {
-			this.tabsOffset = this.pages.size() - ((maxTabs / 3) * 2);
+		if (tabsOffset > (pages.size() - ((maxTabs / 3) * 2))) {
+			tabsOffset = pages.size() - ((maxTabs / 3) * 2);
 		}
-		if (this.tabsOffset < 0) {
-			this.tabsOffset = 0;
+		if (tabsOffset < 0) {
+			tabsOffset = 0;
 		}
 	}
 
 	private void doZoom(AchievementPage page) {
 		int dWheel = Mouse.getDWheel();
-		float prevScale = this.scale;
+		float prevScale = scale;
 
 		if (dWheel < 0) {
-			this.scale += scaleJump;
+			scale += scaleJump;
 		} else if (dWheel > 0) {
-			this.scale -= scaleJump;
+			scale -= scaleJump;
 		}
 
 		boolean customScale = page instanceof ICustomScale;
 		float minZoom = customScale ? ((ICustomScale) page).getMinScale() : GuiBetterAchievements.minZoom;
 		float maxZoom = customScale ? ((ICustomScale) page).getMaxScale() : GuiBetterAchievements.maxZoom;
-		this.scale = MathHelper.clamp_float(this.scale, minZoom, maxZoom);
+		scale = MathHelper.clamp_float(scale, minZoom, maxZoom);
 
-		if (this.scale != prevScale) {
-			float prevScaledWidth = prevScale * this.width;
-			float prevScaledHeight = prevScale * this.height;
-			float newScaledWidth = this.scale * this.width;
-			float newScaledHeight = this.scale * this.height;
-			this.xPos -= (newScaledWidth - prevScaledWidth) / 2;
-			this.yPos -= (newScaledHeight - prevScaledHeight) / 2;
+		if (scale != prevScale) {
+			float prevScaledWidth = prevScale * width;
+			float prevScaledHeight = prevScale * height;
+			float newScaledWidth = scale * width;
+			float newScaledHeight = scale * height;
+			xPos -= (newScaledWidth - prevScaledWidth) / 2;
+			yPos -= (newScaledHeight - prevScaledHeight) / 2;
 		}
 	}
 
 	private void drawAchievement(Achievement achievement) {
-		int achievementXPos = (achievement.displayColumn * achievementSize) - this.xPos;
-		int achievementYPos = (achievement.displayRow * achievementSize) - this.yPos;
+		int achievementXPos = (achievement.displayColumn * achievementSize) - xPos;
+		int achievementYPos = (achievement.displayRow * achievementSize) - yPos;
 
-		if (!this.onScreen(achievementXPos, achievementYPos)) {
+		if (!onScreen(achievementXPos, achievementYPos)) {
 			return;
 		}
 
-		int depth = this.statFileWriter.func_150874_c(achievement);
-		boolean unlocked = this.statFileWriter.hasAchievementUnlocked(achievement);
-		boolean canUnlock = this.statFileWriter.canUnlockAchievement(achievement);
+		int depth = statFileWriter.func_150874_c(achievement);
+		boolean unlocked = statFileWriter.hasAchievementUnlocked(achievement);
+		boolean canUnlock = statFileWriter.canUnlockAchievement(achievement);
 		boolean special = achievement.getSpecial();
 		float brightness;
 
@@ -218,7 +217,7 @@ public class GuiBetterAchievements extends GuiScreen {
 		} else {
 			GlStateManager.color(brightness, brightness, brightness, 1.0F);
 		}
-		this.mc.getTextureManager().bindTexture(SPRITES);
+		mc.getTextureManager().bindTexture(SPRITES);
 		GlStateManager.enableBlend();
 		if (special) {
 			this.drawTexturedModalRect(achievementXPos - achievementOffset, achievementYPos - achievementOffset,
@@ -271,50 +270,50 @@ public class GuiBetterAchievements extends GuiScreen {
 						: GuiBetterAchievements.colourUnlocked);
 		Collections.reverse(achievements);
 		GlStateManager.pushMatrix();
-		float inverseScale = 1.0F / this.scale;
+		float inverseScale = 1.0F / scale;
 		GlStateManager.scale(inverseScale, inverseScale, 1.0F);
 		for (Achievement achievement : achievements) {
 			if ((achievement.parentAchievement != null) && achievements.contains(achievement.parentAchievement)) {
-				this.drawArrow(achievement, colourCantUnlock, colourCanUnlock, colourUnlocked);
+				drawArrow(achievement, colourCantUnlock, colourCanUnlock, colourUnlocked);
 			}
 		}
 		for (Achievement achievement : achievements) {
-			this.drawAchievement(achievement);
-			if (this.onAchievement(achievement, mouseX, mouseY)) {
-				this.hoveredAchievement = achievement;
+			drawAchievement(achievement);
+			if (onAchievement(achievement, mouseX, mouseY)) {
+				hoveredAchievement = achievement;
 			}
 		}
 		GlStateManager.popMatrix();
 	}
 
 	private void drawAchievementsBackground(AchievementPage page) {
-		GL11.glTranslatef(this.left, this.top + borderWidthY, -200.0F);
+		GL11.glTranslatef(left, top + borderWidthY, -200.0F);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableLighting();
 		GlStateManager.enableRescaleNormal();
 		GlStateManager.enableColorMaterial();
 		if (page instanceof ICustomBackground) {
 			GlStateManager.pushMatrix();
-			((ICustomBackground) page).drawBackground(this.left, this.top, innerWidth + borderWidthX,
-					innerHeight + borderWidthY, this.zLevel, this.scale);
+			((ICustomBackground) page).drawBackground(left, top, innerWidth + borderWidthX, innerHeight + borderWidthY,
+					zLevel, scale);
 			GlStateManager.popMatrix();
 		} else {
 			GlStateManager.pushMatrix();
-			float scaleInverse = 1.0F / this.scale;
+			float scaleInverse = 1.0F / scale;
 			GlStateManager.scale(scaleInverse, scaleInverse, 1.0F);
 			float scale = blockSize / this.scale;
-			int dragX = (this.xPos - minDisplayColumn) >> 4;
-			int dragY = (this.yPos - minDisplayRow) >> 4;
-			int antiJumpX = (this.xPos - minDisplayColumn) % 16;
-			int antiJumpY = (this.yPos - minDisplayRow) % 16;
+			int dragX = (xPos - minDisplayColumn) >> 4;
+			int dragY = (yPos - minDisplayRow) >> 4;
+			int antiJumpX = (xPos - minDisplayColumn) % 16;
+			int antiJumpY = (yPos - minDisplayRow) % 16;
 			// TODO: some smarter background gen
-			this.mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+			mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 			for (int y = 1; ((y * scale) - antiJumpY) < (innerHeight + borderWidthY); y++) {
 				float darkness = 0.7F - ((dragY + y) / 80.0F);
 				GL11.glColor4f(darkness, darkness, darkness, 1.0F);
-				this.mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+				mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 				for (int x = 1; ((x * scale) - antiJumpX) < (innerWidth + borderWidthX); x++) {
-					random.setSeed(this.mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
+					random.setSeed(mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
 					int r = random.nextInt(1 + dragY + y) + ((dragY + y) / 2);
 					TextureAtlasSprite icon = RenderHelper.getIcon(Blocks.grass);
 					if (r == 40) {
@@ -345,22 +344,21 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private void drawArrow(Achievement achievement, int colourCantUnlock, int colourCanUnlock, int colourUnlocked) {
-		int depth = this.statFileWriter.func_150874_c(achievement); // How far
-																	// is the
-																	// nearest
-																	// unlocked
-																	// parent
+		int depth = statFileWriter.func_150874_c(achievement); // How far
+																// is the
+																// nearest
+																// unlocked
+																// parent
 
 		if (depth < 5) {
-			int achievementXPos = ((achievement.displayColumn * achievementSize) - this.xPos)
+			int achievementXPos = ((achievement.displayColumn * achievementSize) - xPos) + (achievementInnerSize / 2);
+			int achievementYPos = ((achievement.displayRow * achievementSize) - yPos) + (achievementInnerSize / 2);
+			int parentXPos = ((achievement.parentAchievement.displayColumn * achievementSize) - xPos)
 					+ (achievementInnerSize / 2);
-			int achievementYPos = ((achievement.displayRow * achievementSize) - this.yPos) + (achievementInnerSize / 2);
-			int parentXPos = ((achievement.parentAchievement.displayColumn * achievementSize) - this.xPos)
+			int parentYPos = ((achievement.parentAchievement.displayRow * achievementSize) - yPos)
 					+ (achievementInnerSize / 2);
-			int parentYPos = ((achievement.parentAchievement.displayRow * achievementSize) - this.yPos)
-					+ (achievementInnerSize / 2);
-			boolean unlocked = this.statFileWriter.hasAchievementUnlocked(achievement);
-			boolean canUnlock = this.statFileWriter.canUnlockAchievement(achievement);
+			boolean unlocked = statFileWriter.hasAchievementUnlocked(achievement);
+			boolean canUnlock = statFileWriter.canUnlockAchievement(achievement);
 			int colour = colourCantUnlock;
 
 			if (unlocked) {
@@ -369,10 +367,10 @@ public class GuiBetterAchievements extends GuiScreen {
 				colour = colourCanUnlock;
 			}
 
-			this.drawHorizontalLine(achievementXPos, parentXPos, achievementYPos, colour);
-			this.drawVerticalLine(parentXPos, achievementYPos, parentYPos, colour);
+			drawHorizontalLine(achievementXPos, parentXPos, achievementYPos, colour);
+			drawVerticalLine(parentXPos, achievementYPos, parentYPos, colour);
 
-			this.mc.getTextureManager().bindTexture(SPRITES);
+			mc.getTextureManager().bindTexture(SPRITES);
 			GlStateManager.enableBlend();
 			if (achievementXPos > parentXPos) {
 				this.drawTexturedModalRect(achievementXPos - (achievementInnerSize / 2) - arrowHeadHeight,
@@ -392,52 +390,52 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private void drawCurrentTab(AchievementPage selected) {
-		for (int i = this.tabsOffset; (i < (maxTabs + this.tabsOffset)) && (this.pages.size() > i); i++) {
-			AchievementPage page = this.pages.get(i);
+		for (int i = tabsOffset; (i < (maxTabs + tabsOffset)) && (pages.size() > i); i++) {
+			AchievementPage page = pages.get(i);
 			if (page != selected) {
 				continue;
 			}
 			GlStateManager.disableLighting();
 			GlStateManager.enableBlend();
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			int j = (i - this.tabsOffset) * tabWidth;
-			this.mc.getTextureManager().bindTexture(TABS);
-			this.drawTexturedModalRect(this.left + tabOffsetX + j, this.top + tabOffsetY, j, 32, tabWidth, tabHeight);
-			this.drawPageIcon(page, this.left + tabOffsetX + j, this.top + tabOffsetY);
+			int j = (i - tabsOffset) * tabWidth;
+			mc.getTextureManager().bindTexture(TABS);
+			this.drawTexturedModalRect(left + tabOffsetX + j, top + tabOffsetY, j, 32, tabWidth, tabHeight);
+			drawPageIcon(page, left + tabOffsetX + j, top + tabOffsetY);
 		}
 	}
 
 	private void drawMouseOverAchievement(int mouseX, int mouseY) {
-		if ((this.hoveredAchievement == null) || !this.inInnerScreen(mouseX, mouseY)) {
+		if ((hoveredAchievement == null) || !inInnerScreen(mouseX, mouseY)) {
 			return;
 		}
 
 		if (iconReset && Mouse.isButtonDown(2)) {
-			AchievementRegistry.instance().registerIcon(this.pages.get(this.currentPage).getName(),
-					this.hoveredAchievement.theItemStack, true);
+			AchievementRegistry.instance().registerIcon(pages.get(currentPage).getName(),
+					hoveredAchievement.theItemStack, true);
 		}
 
 		int tooltipX = mouseX + 12;
 		int tooltipY = mouseY - 4;
 
-		if (this.hoveredAchievement instanceof ICustomTooltip) {
-			((ICustomTooltip) this.hoveredAchievement).renderTooltip(mouseX, mouseY, this.statFileWriter);
+		if (hoveredAchievement instanceof ICustomTooltip) {
+			((ICustomTooltip) hoveredAchievement).renderTooltip(mouseX, mouseY, statFileWriter);
 		} else {
-			String title = this.hoveredAchievement.getStatName().getUnformattedText();
-			String desc = this.hoveredAchievement.getDescription();
+			String title = hoveredAchievement.getStatName().getUnformattedText();
+			String desc = hoveredAchievement.getDescription();
 
-			int depth = this.statFileWriter.func_150874_c(this.hoveredAchievement);
-			boolean unlocked = this.statFileWriter.hasAchievementUnlocked(this.hoveredAchievement);
-			boolean canUnlock = this.statFileWriter.canUnlockAchievement(this.hoveredAchievement);
-			boolean special = this.hoveredAchievement.getSpecial();
+			int depth = statFileWriter.func_150874_c(hoveredAchievement);
+			boolean unlocked = statFileWriter.hasAchievementUnlocked(hoveredAchievement);
+			boolean canUnlock = statFileWriter.canUnlockAchievement(hoveredAchievement);
+			boolean special = hoveredAchievement.getSpecial();
 			int tooltipWidth = defaultTooltipWidth;
 
 			if (!canUnlock) {
 				if (depth > 3) {
 					return;
 				} else {
-					desc = this.getChatComponentTranslation("achievement.requires",
-							this.hoveredAchievement.parentAchievement.getStatName());
+					desc = getChatComponentTranslation("achievement.requires",
+							hoveredAchievement.parentAchievement.getStatName());
 				}
 
 				if (depth == 3) {
@@ -445,90 +443,90 @@ public class GuiBetterAchievements extends GuiScreen {
 				}
 			}
 
-			tooltipWidth = Math.max(this.fontRendererObj.getStringWidth(title), tooltipWidth);
-			int tooltipHeight = this.fontRendererObj.splitStringWidth(desc, tooltipWidth);
+			tooltipWidth = Math.max(fontRendererObj.getStringWidth(title), tooltipWidth);
+			int tooltipHeight = fontRendererObj.splitStringWidth(desc, tooltipWidth);
 
 			if (unlocked) {
 				tooltipHeight += lineSize;
 			}
 
-			this.drawGradientRect(tooltipX - achievementTooltipOffset, tooltipY - achievementTooltipOffset,
+			drawGradientRect(tooltipX - achievementTooltipOffset, tooltipY - achievementTooltipOffset,
 					tooltipX + tooltipWidth + achievementTooltipOffset,
 					tooltipY + tooltipHeight + achievementTooltipOffset + lineSize, -1073741824, -1073741824);
-			this.fontRendererObj.drawStringWithShadow(title, tooltipX, tooltipY,
+			fontRendererObj.drawStringWithShadow(title, tooltipX, tooltipY,
 					canUnlock ? (special ? -128 : -1) : (special ? -8355776 : -8355712));
-			this.fontRendererObj.drawSplitString(desc, tooltipX, tooltipY + lineSize, tooltipWidth, -6250336);
+			fontRendererObj.drawSplitString(desc, tooltipX, tooltipY + lineSize, tooltipWidth, -6250336);
 			if (unlocked) {
-				this.fontRendererObj.drawStringWithShadow(I18n.format("achievement.taken"), tooltipX,
+				fontRendererObj.drawStringWithShadow(I18n.format("achievement.taken"), tooltipX,
 						tooltipY + tooltipHeight + 4, -7302913);
 			}
 		}
 
-		this.hoveredAchievement = null;
+		hoveredAchievement = null;
 	}
 
 	private void drawMouseOverTab(int mouseX, int mouseY) {
-		int onTab = this.onTab(mouseX, mouseY);
-		if ((onTab == -1) || (this.pages.size() <= onTab)) {
+		int onTab = onTab(mouseX, mouseY);
+		if ((onTab == -1) || (pages.size() <= onTab)) {
 			return;
 		}
-		AchievementPage page = this.pages.get(onTab);
+		AchievementPage page = pages.get(onTab);
 		List<String> tooltip = new LinkedList<String>();
 		tooltip.add(page.getName());
-		this.drawHoveringText(tooltip, mouseX, mouseY, this.fontRendererObj);
+		this.drawHoveringText(tooltip, mouseX, mouseY, fontRendererObj);
 	}
 
 	private void drawPageIcon(AchievementPage page, int tabLeft, int tabTop) {
 		ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
 		if (itemStack != null) {
-			this.zLevel = 100.0F;
-			this.itemRender.zLevel = 100.0F;
+			zLevel = 100.0F;
+			itemRender.zLevel = 100.0F;
 			net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
 			GlStateManager.enableRescaleNormal();
-			this.itemRender.renderItemAndEffectIntoGUI(itemStack, tabLeft + 6, tabTop + 9);
-			this.itemRender.zLevel = 0.0F;
+			itemRender.renderItemAndEffectIntoGUI(itemStack, tabLeft + 6, tabTop + 9);
+			itemRender.zLevel = 0.0F;
 			GlStateManager.disableLighting();
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			this.zLevel = 0.0F;
+			zLevel = 0.0F;
 		}
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
-		this.drawDefaultBackground();
-		AchievementPage page = this.pages.get(this.currentPage);
+		drawDefaultBackground();
+		AchievementPage page = pages.get(currentPage);
 		this.handleMouseInput(mouseX, mouseY, page);
-		this.drawUnselectedTabs(page);
+		drawUnselectedTabs(page);
 		GlStateManager.depthFunc(GL11.GL_GEQUAL);
 		GlStateManager.pushMatrix();
-		this.drawAchievementsBackground(page);
-		this.drawAchievements(page, mouseX, mouseY);
+		drawAchievementsBackground(page);
+		drawAchievements(page, mouseX, mouseY);
 		GlStateManager.popMatrix();
 		GlStateManager.enableBlend();
-		this.mc.getTextureManager().bindTexture(SPRITES);
+		mc.getTextureManager().bindTexture(SPRITES);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		this.drawTexturedModalRect(this.left, this.top + (tabHeight / 2), 0, 0, guiWidth, guiHeight);
-		this.drawCurrentTab(page);
-		this.fontRendererObj.drawString(page.getName() + " " + I18n.format("gui.achievements"), this.left + 15,
-				this.top + (tabHeight / 2) + 5, 4210752);
+		this.drawTexturedModalRect(left, top + (tabHeight / 2), 0, 0, guiWidth, guiHeight);
+		drawCurrentTab(page);
+		fontRendererObj.drawString(page.getName() + " " + I18n.format("gui.achievements"), left + 15,
+				top + (tabHeight / 2) + 5, 4210752);
 		super.drawScreen(mouseX, mouseY, renderPartialTicks);
-		this.drawMouseOverAchievement(mouseX, mouseY);
-		this.drawMouseOverTab(mouseX, mouseY);
+		drawMouseOverAchievement(mouseX, mouseY);
+		drawMouseOverTab(mouseX, mouseY);
 	}
 
 	private void drawUnselectedTabs(AchievementPage selected) {
-		for (int i = this.tabsOffset; (i < (maxTabs + this.tabsOffset)) && (this.pages.size() > i); i++) {
-			AchievementPage page = this.pages.get(i);
+		for (int i = tabsOffset; (i < (maxTabs + tabsOffset)) && (pages.size() > i); i++) {
+			AchievementPage page = pages.get(i);
 			if (page == selected) {
 				continue;
 			}
 			GlStateManager.disableLighting();
 			GlStateManager.enableBlend();
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			int j = (i - this.tabsOffset) * tabWidth;
-			this.mc.getTextureManager().bindTexture(TABS);
-			this.drawTexturedModalRect(this.left + tabOffsetX + j, this.top + tabOffsetY, j, 0, tabWidth, tabHeight);
-			this.drawPageIcon(page, this.left + tabOffsetX + j, this.top + tabOffsetY);
+			int j = (i - tabsOffset) * tabWidth;
+			mc.getTextureManager().bindTexture(TABS);
+			this.drawTexturedModalRect(left + tabOffsetX + j, top + tabOffsetY, j, 0, tabWidth, tabHeight);
+			drawPageIcon(page, left + tabOffsetX + j, top + tabOffsetY);
 		}
 	}
 
@@ -537,123 +535,123 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private void handleMouseClick(int mouseX, int mouseY) {
-		int onTab = this.onTab(mouseX, mouseY);
-		if ((onTab == -1) || (this.pages.size() <= onTab) || (this.currentPage == onTab)) {
+		int onTab = onTab(mouseX, mouseY);
+		if ((onTab == -1) || (pages.size() <= onTab) || (currentPage == onTab)) {
 			return;
 		}
-		this.currentPage = onTab;
-		AchievementPage page = this.pages.get(this.currentPage);
+		currentPage = onTab;
+		AchievementPage page = pages.get(currentPage);
 		if ((page instanceof ICustomScale) && ((ICustomScale) page).resetScaleOnLoad()) {
-			this.scale = ((ICustomScale) page).setScale();
+			scale = ((ICustomScale) page).setScale();
 		}
 
 		if (page instanceof ICustomPosition) {
 			Achievement center = ((ICustomPosition) page).setPositionOnLoad();
-			this.xPos = (center.displayColumn * achievementSize) + (achievementSize * 3);
-			this.yPos = (center.displayRow * achievementSize) + achievementSize;
+			xPos = (center.displayColumn * achievementSize) + (achievementSize * 3);
+			yPos = (center.displayRow * achievementSize) + achievementSize;
 		}
 	}
 
 	private void handleMouseInput(int mouseX, int mouseY, AchievementPage page) {
-		this.doDrag(mouseX, mouseY);
-		if (this.onTab(mouseX, mouseY) != -1) {
-			this.doTabScroll();
+		doDrag(mouseX, mouseY);
+		if (onTab(mouseX, mouseY) != -1) {
+			doTabScroll();
 		} else {
-			this.doZoom(page);
+			doZoom(page);
 		}
-		if (this.xPos < minDisplayColumn) {
-			this.xPos = minDisplayColumn;
+		if (xPos < minDisplayColumn) {
+			xPos = minDisplayColumn;
 		}
-		if (this.xPos > maxDisplayColumn) {
-			this.xPos = maxDisplayColumn;
+		if (xPos > maxDisplayColumn) {
+			xPos = maxDisplayColumn;
 		}
-		if (this.yPos < minDisplayRow) {
-			this.yPos = minDisplayRow;
+		if (yPos < minDisplayRow) {
+			yPos = minDisplayRow;
 		}
-		if (this.yPos > maxDisplayRow) {
-			this.yPos = maxDisplayRow;
+		if (yPos > maxDisplayRow) {
+			yPos = maxDisplayRow;
 		}
 		if (Mouse.isButtonDown(0)) {
-			this.handleMouseClick(mouseX, mouseY);
+			handleMouseClick(mouseX, mouseY);
 		}
 	}
 
 	private boolean inInnerScreen(int mouseX, int mouseY) {
-		return (mouseX > (this.left + borderWidthX)) && (mouseX < ((this.left + guiWidth) - borderWidthX))
-				&& (mouseY > (this.top + borderWidthY)) && (mouseY < ((this.top + guiHeight) - borderWidthY));
+		return (mouseX > (left + borderWidthX)) && (mouseX < ((left + guiWidth) - borderWidthX))
+				&& (mouseY > (top + borderWidthY)) && (mouseY < ((top + guiHeight) - borderWidthY));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
-		this.left = (this.width - guiWidth) / 2;
-		this.top = (this.height - guiHeight) / 2;
-		this.scale = 1.0F;
-		this.xPos = achievementSize * 3;
-		this.yPos = achievementSize;
+		left = (width - guiWidth) / 2;
+		top = (height - guiHeight) / 2;
+		scale = 1.0F;
+		xPos = achievementSize * 3;
+		yPos = achievementSize;
 
-		this.buttonList.clear();
-		this.buttonList.add(new GuiButton(buttonDone, (this.width / 2) + buttonOffsetX,
-				(this.height / 2) + buttonOffsetY, 80, 20, I18n.format("gui.done")));
+		buttonList.clear();
+		buttonList.add(new GuiButton(buttonDone, (width / 2) + buttonOffsetX, (height / 2) + buttonOffsetY, 80, 20,
+				I18n.format("gui.done")));
 		// this.buttonList.add(new GuiButton(buttonOld, this.left +
 		// buttonOffsetX, this.height / 2 + buttonOffsetY, 125, 20,
 		// I18n.format("com.dyn.betterachievements.gui.old")));
 
-		this.hoveredAchievement = null;
-		this.pages = AchievementRegistry.instance().getAllPages();
-		if (this.pages.size() > maxTabs) {
+		hoveredAchievement = null;
+		pages = AchievementRegistry.instance().getAllPages();
+		if (pages.size() > maxTabs) {
 			scrollButtons = false;
 		}
 		if (scrollButtons) {
-			this.buttonList.add(new GuiButton(buttonPrev, this.left - 24, this.top - 5, 20, 20, "<"));
-			this.buttonList.add(new GuiButton(buttonNext, this.left + 256, this.top - 5, 20, 20, ">"));
+			buttonList.add(new GuiButton(buttonPrev, left - 24, top - 5, 20, 20, "<"));
+			buttonList.add(new GuiButton(buttonNext, left + 256, top - 5, 20, 20, ">"));
 		}
 
-		this.tabsOffset = this.currentPage < ((maxTabs / 3) * 2) ? 0 : this.currentPage - ((maxTabs / 3) * 2);
-		if (this.tabsOffset < 0) {
-			this.tabsOffset = 0;
+		tabsOffset = currentPage < ((maxTabs / 3) * 2) ? 0 : currentPage - ((maxTabs / 3) * 2);
+		if (tabsOffset < 0) {
+			tabsOffset = 0;
 		}
 
-		AchievementPage page = this.pages.get(this.currentPage);
+		AchievementPage page = pages.get(currentPage);
 		if (page instanceof ICustomScale) {
-			this.scale = ((ICustomScale) page).setScale();
+			scale = ((ICustomScale) page).setScale();
 		}
 
 		if (page instanceof ICustomPosition) {
 			Achievement center = ((ICustomPosition) page).setPositionOnLoad();
-			this.xPos = (center.displayColumn * achievementSize) + (achievementSize * 3);
-			this.yPos = (center.displayRow * achievementSize) + achievementSize;
+			xPos = (center.displayColumn * achievementSize) + (achievementSize * 3);
+			yPos = (center.displayRow * achievementSize) + achievementSize;
 		}
 	}
 
 	@Override
 	protected void keyTyped(char c, int i) throws IOException {
-		if (i == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
-			this.mc.displayGuiScreen(null);
-			this.mc.setIngameFocus();
+		if (i == mc.gameSettings.keyBindInventory.getKeyCode()) {
+			mc.displayGuiScreen(null);
+			mc.setIngameFocus();
 		} else if (i == Keyboard.KEY_LEFT) {
-			this.currentPage--;
-			if (this.currentPage < 0) {
-				this.currentPage = this.pages.size() - 1;
-				this.tabsOffset += (this.pages.size() / maxTabs) * maxTabs;
+			currentPage--;
+			if (currentPage < 0) {
+				currentPage = pages.size() - 1;
+				tabsOffset += (pages.size() / maxTabs) * maxTabs;
 			}
-			if ((this.currentPage - this.tabsOffset) < 0) {
-				this.tabsOffset -= maxTabs;
+			if ((currentPage - tabsOffset) < 0) {
+				tabsOffset -= maxTabs;
 			}
-			if (this.tabsOffset < 0) {
-				this.tabsOffset = 0;
+			if (tabsOffset < 0) {
+				tabsOffset = 0;
 			}
 		} else if (i == Keyboard.KEY_RIGHT) {
-			this.currentPage++;
-			if (this.currentPage >= this.pages.size()) {
-				this.currentPage = 0;
-				this.tabsOffset = 0;
+			currentPage++;
+			if (currentPage >= pages.size()) {
+				currentPage = 0;
+				tabsOffset = 0;
 			}
-			if ((this.currentPage - this.tabsOffset) >= maxTabs) {
-				this.tabsOffset += maxTabs;
+			if ((currentPage - tabsOffset) >= maxTabs) {
+				tabsOffset += maxTabs;
 			}
-			if (this.pages.size() <= this.tabsOffset) {
-				this.tabsOffset = this.pages.size() - 1;
+			if (pages.size() <= tabsOffset) {
+				tabsOffset = pages.size() - 1;
 			}
 		} else {
 			super.keyTyped(c, i);
@@ -661,22 +659,22 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private boolean onAchievement(Achievement achievement, int mouseX, int mouseY) {
-		int achievementXPos = (achievement.displayColumn * achievementSize) - this.xPos;
-		int achievementYPos = ((achievement.displayRow * achievementSize) - this.yPos) + achievementInnerSize;
-		return (mouseX > (this.left + (achievementXPos / this.scale)))
-				&& (mouseX < (this.left + ((achievementXPos + achievementInnerSize) / this.scale)))
-				&& (mouseY > (this.top + (achievementYPos / this.scale)))
-				&& (mouseY < (this.top + ((achievementYPos + achievementInnerSize) / this.scale)));
+		int achievementXPos = (achievement.displayColumn * achievementSize) - xPos;
+		int achievementYPos = ((achievement.displayRow * achievementSize) - yPos) + achievementInnerSize;
+		return (mouseX > (left + (achievementXPos / scale)))
+				&& (mouseX < (left + ((achievementXPos + achievementInnerSize) / scale)))
+				&& (mouseY > (top + (achievementYPos / scale)))
+				&& (mouseY < (top + ((achievementYPos + achievementInnerSize) / scale)));
 	}
 
 	@Override
 	public void onGuiClosed() {
-		lastPage = this.currentPage;
+		lastPage = currentPage;
 	}
 
 	private boolean onScreen(int x, int y) {
-		return (x > 0) && (x < ((guiWidth * this.scale) - achievementSize)) && (y > 0)
-				&& (y < ((guiHeight * this.scale) - achievementSize));
+		return (x > 0) && (x < ((guiWidth * scale) - achievementSize)) && (y > 0)
+				&& (y < ((guiHeight * scale) - achievementSize));
 	}
 
 	/**
@@ -689,9 +687,9 @@ public class GuiBetterAchievements extends GuiScreen {
 	 * @return -1 if not on a tab otherwise the index
 	 */
 	private int onTab(int mouseX, int mouseY) {
-		if ((mouseX > (this.left + tabOffsetX)) && (mouseX < (this.left + guiWidth))
-				&& (mouseY > (this.top + tabOffsetY)) && (mouseY < (this.top + tabOffsetY + tabHeight))) {
-			return ((mouseX - (this.left + tabOffsetX)) / tabWidth) + this.tabsOffset;
+		if ((mouseX > (left + tabOffsetX)) && (mouseX < (left + guiWidth)) && (mouseY > (top + tabOffsetY))
+				&& (mouseY < (top + tabOffsetY + tabHeight))) {
+			return ((mouseX - (left + tabOffsetX)) / tabWidth) + tabsOffset;
 		}
 		return -1;
 	}

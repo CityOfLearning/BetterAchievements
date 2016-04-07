@@ -38,16 +38,16 @@ public final class AchievementRegistry {
 	private boolean firstLoad;
 
 	private AchievementRegistry() {
-		this.firstLoad = true;
-		this.mcAchievements = new LinkedList<Achievement>();
-		this.iconMap = new LinkedHashMap<String, ItemStack>();
-		this.statIdMap = new LinkedHashMap<String, Achievement>();
-		this.userSetIcons = new LinkedHashMap<String, ItemStack>();
+		firstLoad = true;
+		mcAchievements = new LinkedList<Achievement>();
+		iconMap = new LinkedHashMap<String, ItemStack>();
+		statIdMap = new LinkedHashMap<String, Achievement>();
+		userSetIcons = new LinkedHashMap<String, ItemStack>();
 	}
 
 	public String[] dumpUserSetIcons() {
 		List<String> list = new LinkedList<String>();
-		for (Map.Entry<String, ItemStack> entry : this.userSetIcons.entrySet()) {
+		for (Map.Entry<String, ItemStack> entry : userSetIcons.entrySet()) {
 			String pageName = entry.getKey();
 			ItemStack itemStack = entry.getValue();
 			String itemName = GameRegistry.findUniqueIdentifierFor(itemStack.getItem()).toString();
@@ -58,19 +58,19 @@ public final class AchievementRegistry {
 	}
 
 	public Achievement getAchievement(String statId) {
-		return this.statIdMap.get(statId);
+		return statIdMap.get(statId);
 	}
 
 	public List<Achievement> getAchievements(AchievementPage page) {
-		if (this.firstLoad) {
-			this.init();
+		if (firstLoad) {
+			init();
 		}
-		return page == mcPage ? this.mcAchievements : page.getAchievements();
+		return page == mcPage ? mcAchievements : page.getAchievements();
 	}
 
 	public List<AchievementPage> getAllPages() {
-		if (this.firstLoad) {
-			this.init();
+		if (firstLoad) {
+			init();
 		}
 		List<AchievementPage> pages = new LinkedList<AchievementPage>();
 		pages.add(mcPage);
@@ -85,7 +85,7 @@ public final class AchievementRegistry {
 		if (page == null) {
 			return null;
 		}
-		ItemStack itemStack = this.iconMap.get(page.getName());
+		ItemStack itemStack = iconMap.get(page.getName());
 		if (itemStack == null) {
 			if (page instanceof ICustomIcon) {
 				itemStack = ((ICustomIcon) page).getPageIcon();
@@ -94,7 +94,7 @@ public final class AchievementRegistry {
 				for (Achievement achievement : page.getAchievements()) {
 					if (achievement.parentAchievement == null) {
 						itemStack = achievement.theItemStack;
-						this.iconMap.put(page.getName(), itemStack);
+						iconMap.put(page.getName(), itemStack);
 						break;
 					}
 				}
@@ -106,20 +106,20 @@ public final class AchievementRegistry {
 	private void init() {
 		for (Object oa : AchievementList.achievementList) {
 			Achievement achievement = (Achievement) oa;
-			this.statIdMap.put(achievement.statId, achievement);
+			statIdMap.put(achievement.statId, achievement);
 			if (!AchievementPage.isAchievementInPages(achievement)) {
-				this.mcAchievements.add(achievement);
+				mcAchievements.add(achievement);
 			}
 		}
-		this.iconMap.put(mcPage.getName(), new ItemStack(Blocks.grass));
-		this.iconMap.putAll(this.userSetIcons);
-		this.firstLoad = false;
+		iconMap.put(mcPage.getName(), new ItemStack(Blocks.grass));
+		iconMap.putAll(userSetIcons);
+		firstLoad = false;
 	}
 
 	public void registerIcon(String pageName, ItemStack itemStack, boolean userSet) {
-		this.iconMap.put(pageName, itemStack);
+		iconMap.put(pageName, itemStack);
 		if (userSet) {
-			this.userSetIcons.put(pageName, itemStack);
+			userSetIcons.put(pageName, itemStack);
 		}
 	}
 
@@ -156,7 +156,7 @@ public final class AchievementRegistry {
 				if (nbtTag != null) {
 					itemStack.setTagCompound(nbtTag);
 				}
-				this.userSetIcons.put(split[0], itemStack);
+				userSetIcons.put(split[0], itemStack);
 			}
 			i++;
 		}

@@ -20,7 +20,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class ConfigHandler {
 	public static Configuration config;
 
-	@SuppressWarnings("unchecked")
 	public static List<IConfigElement> getConfigElements() {
 		List<IConfigElement> list = new ArrayList<IConfigElement>();
 		list.addAll(new ConfigElement(config.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements());

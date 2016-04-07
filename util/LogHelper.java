@@ -16,7 +16,7 @@ public class LogHelper {
 	private boolean debug;
 
 	public LogHelper(String id) {
-		this.log = LogManager.getLogger(id);
+		log = LogManager.getLogger(id);
 	}
 
 	public void crash(Exception e, String message) {
@@ -24,10 +24,10 @@ public class LogHelper {
 	}
 
 	public void debug(Object obj) {
-		if (this.debug) {
-			this.log.info(obj);
+		if (debug) {
+			log.info(obj);
 		} else {
-			this.log.debug(obj);
+			log.debug(obj);
 		}
 	}
 
@@ -36,7 +36,7 @@ public class LogHelper {
 	}
 
 	public void info(Object obj) {
-		this.log.info(obj);
+		log.info(obj);
 	}
 
 	public void setDebug(boolean debug) {
@@ -44,6 +44,6 @@ public class LogHelper {
 	}
 
 	public void warn(Object obj) {
-		this.log.warn(obj);
+		log.warn(obj);
 	}
 }
