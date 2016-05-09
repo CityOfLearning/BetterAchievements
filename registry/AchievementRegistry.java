@@ -143,7 +143,7 @@ public final class AchievementRegistry {
 			}
 			NBTTagCompound nbtTag = null;
 			try {
-				nbtTag = (itemSplit.length > 3) && !itemSplit[3].equals("") ? JsonToNBT.func_180713_a(itemSplit[3])
+				nbtTag = (itemSplit.length > 3) && !itemSplit[3].equals("") ? JsonToNBT.getTagFromJson(itemSplit[3])
 						: null;
 			} catch (NBTException e) {
 				LogHelper.instance().error(e, "Invalid input for nbt data on entry " + i);
