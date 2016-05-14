@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 
 import com.dyn.betterachievements.gui.GuiAchievementsOld;
 import com.dyn.betterachievements.gui.GuiBetterAchievements;
+import com.dyn.server.ServerMod;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiCommandBlock;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.achievement.GuiAchievements;
 import net.minecraftforge.client.event.GuiOpenEvent;
