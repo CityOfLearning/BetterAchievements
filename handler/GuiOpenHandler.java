@@ -35,6 +35,13 @@ public class GuiOpenHandler {
 		if (event.gui instanceof GuiAchievementsOld) {
 			return;
 		}
+		
+		// this seems weird to be placed here but it will stop unintended
+		// command block manipulations
+		if ((event.gui instanceof GuiCommandBlock) && !(ServerMod.opped)) {
+			event.setCanceled(true);
+			return;
+		}
 
 		if (event.gui instanceof GuiAchievements) {
 			event.setCanceled(true);
