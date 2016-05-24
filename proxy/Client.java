@@ -7,14 +7,13 @@ import com.dyn.betterachievements.handler.GuiOpenHandler;
 import com.dyn.betterachievements.handler.SaveHandler;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class Client implements Proxy {
 
 	@Override
 	public void initConfig(File file) {
 		ConfigHandler.init(file);
-		FMLCommonHandler.instance().bus().register(new ConfigHandler());
+		MinecraftForge.EVENT_BUS.register(new ConfigHandler());
 	}
 
 	@Override

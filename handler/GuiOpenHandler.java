@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import com.dyn.betterachievements.gui.GuiAchievementsOld;
 import com.dyn.betterachievements.gui.GuiBetterAchievements;
 import com.dyn.server.ServerMod;
+import com.dyn.server.utils.PlayerLevel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiCommandBlock;
@@ -37,10 +38,10 @@ public class GuiOpenHandler {
 		if (event.gui instanceof GuiAchievementsOld) {
 			return;
 		}
-		
+
 		// this seems weird to be placed here but it will stop unintended
 		// command block manipulations
-		if ((event.gui instanceof GuiCommandBlock) && !(ServerMod.opped)) {
+		if ((event.gui instanceof GuiCommandBlock) && !(ServerMod.status == PlayerLevel.ADMIN)) {
 			event.setCanceled(true);
 			return;
 		}

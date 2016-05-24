@@ -581,7 +581,6 @@ public class GuiBetterAchievements extends GuiScreen {
 				&& (mouseY > (top + borderWidthY)) && (mouseY < ((top + guiHeight) - borderWidthY));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		left = (width - guiWidth) / 2;

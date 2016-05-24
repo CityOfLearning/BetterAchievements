@@ -50,7 +50,7 @@ public final class AchievementRegistry {
 		for (Map.Entry<String, ItemStack> entry : userSetIcons.entrySet()) {
 			String pageName = entry.getKey();
 			ItemStack itemStack = entry.getValue();
-			String itemName = GameRegistry.findUniqueIdentifierFor(itemStack.getItem()).toString();
+			String itemName = itemStack.getItem().getRegistryName();
 			String nbtCompoundTag = itemStack.hasTagCompound() ? itemStack.getTagCompound().toString() : "";
 			list.add(pageName + "->" + itemName + ":" + entry.getValue().getItemDamage() + ":" + nbtCompoundTag);
 		}

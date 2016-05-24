@@ -1,7 +1,6 @@
 package com.dyn.betterachievements.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.dyn.DYNServerMod;
 
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
@@ -11,12 +10,10 @@ public class LogHelper {
 		return new LogHelper(Loader.instance().activeModContainer().getModId());
 	}
 
-	private Logger log;
-
 	private boolean debug;
 
 	public LogHelper(String id) {
-		log = LogManager.getLogger(id);
+		// DYNServerMod.logger = LogManager.getLogger(id);
 	}
 
 	public void crash(Exception e, String message) {
@@ -25,9 +22,9 @@ public class LogHelper {
 
 	public void debug(Object obj) {
 		if (debug) {
-			log.info(obj);
+			DYNServerMod.logger.info(obj);
 		} else {
-			log.debug(obj);
+			DYNServerMod.logger.debug(obj);
 		}
 	}
 
@@ -36,7 +33,7 @@ public class LogHelper {
 	}
 
 	public void info(Object obj) {
-		log.info(obj);
+		DYNServerMod.logger.info(obj);
 	}
 
 	public void setDebug(boolean debug) {
@@ -44,6 +41,6 @@ public class LogHelper {
 	}
 
 	public void warn(Object obj) {
-		log.warn(obj);
+		DYNServerMod.logger.warn(obj);
 	}
 }
