@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dyn.betterachievements.api.util.ColourHelper;
 import com.dyn.betterachievements.gui.GuiBetterAchievements;
 import com.dyn.betterachievements.reference.Reference;
 import com.dyn.betterachievements.registry.AchievementRegistry;
+import com.dyn.betterachievements.util.ColourHelper;
 
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.ConfigElement;

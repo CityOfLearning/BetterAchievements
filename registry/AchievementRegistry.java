@@ -5,8 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.dyn.betterachievements.api.components.page.ICustomIcon;
-import com.dyn.betterachievements.util.LogHelper;
+import com.dyn.DYNServerMod;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -87,9 +86,6 @@ public final class AchievementRegistry {
 		}
 		ItemStack itemStack = iconMap.get(page.getName());
 		if (itemStack == null) {
-			if (page instanceof ICustomIcon) {
-				itemStack = ((ICustomIcon) page).getPageIcon();
-			}
 			if (itemStack == null) {
 				for (Achievement achievement : page.getAchievements()) {
 					if (achievement.parentAchievement == null) {
@@ -139,14 +135,14 @@ public final class AchievementRegistry {
 			try {
 				meta = itemSplit.length > 2 ? Integer.parseInt(itemSplit[2]) : 0;
 			} catch (NumberFormatException e) {
-				LogHelper.instance().error(e, "Invalid input for meta data on entry " + i);
+				DYNServerMod.logger.error("Invalid input for meta data on entry " + i);
 			}
 			NBTTagCompound nbtTag = null;
 			try {
 				nbtTag = (itemSplit.length > 3) && !itemSplit[3].equals("") ? JsonToNBT.getTagFromJson(itemSplit[3])
 						: null;
 			} catch (NBTException e) {
-				LogHelper.instance().error(e, "Invalid input for nbt data on entry " + i);
+				DYNServerMod.logger.error("Invalid input for nbt data on entry " + i);
 			}
 			ItemStack itemStack = null;
 			if (item != null) {

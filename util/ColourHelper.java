@@ -1,6 +1,6 @@
-package com.dyn.betterachievements.api.util;
+package com.dyn.betterachievements.util;
 
-import com.dyn.betterachievements.util.LogHelper;
+import com.dyn.DYNServerMod;
 
 public class ColourHelper {
 	/**
@@ -125,7 +125,7 @@ public class ColourHelper {
 			try {
 				result[i - 1] = Float.parseFloat(splitted[i]);
 			} catch (NumberFormatException e) {
-				LogHelper.instance().error(e, "Parsing error while creating rainbow settings");
+				DYNServerMod.logger.error("Parsing error while creating rainbow settings");
 			}
 		}
 		return result;

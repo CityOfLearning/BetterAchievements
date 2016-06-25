@@ -10,16 +10,9 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import com.dyn.betterachievements.api.components.achievement.ICustomBackgroundColour;
-import com.dyn.betterachievements.api.components.achievement.ICustomIconRenderer;
-import com.dyn.betterachievements.api.components.achievement.ICustomTooltip;
-import com.dyn.betterachievements.api.components.page.ICustomArrows;
-import com.dyn.betterachievements.api.components.page.ICustomBackground;
-import com.dyn.betterachievements.api.components.page.ICustomPosition;
-import com.dyn.betterachievements.api.components.page.ICustomScale;
-import com.dyn.betterachievements.api.util.ColourHelper;
 import com.dyn.betterachievements.reference.Reference;
 import com.dyn.betterachievements.registry.AchievementRegistry;
+import com.dyn.betterachievements.util.ColourHelper;
 import com.dyn.betterachievements.util.RenderHelper;
 
 import net.minecraft.client.Minecraft;
@@ -52,10 +45,9 @@ public class GuiBetterAchievements extends GuiScreen {
 			arrowHeadHeight = 7, arrowOffset = 5, arrowRightX = 114, arrowRightY = 234, arrowLeftX = 107,
 			arrowLeftY = 234, arrowDownX = 96, arrowDownY = 234, arrowUpX = 96, arrowUpY = 241, achievementX = 0,
 			achievementY = 202, achievementTooltipOffset = 3, achievementTextureSize = 26, achievementOffset = 2,
-			achievementSize = 24, achievementInnerSize = 22, buttonDone = 1, buttonOld = 2, buttonPrev = 3,
-			buttonNext = 4, buttonOffsetX = 24, buttonOffsetY = 92, guiWidth = 252, guiHeight = 202, tabWidth = 28,
-			tabHeight = 32, borderWidthX = 8, borderWidthY = 17, tabOffsetX = 0, tabOffsetY = -12, innerWidth = 228,
-			innerHeight = 158,
+			achievementSize = 24, achievementInnerSize = 22, buttonDone = 1, buttonPrev = 3, buttonNext = 4,
+			buttonOffsetX = 24, buttonOffsetY = 92, guiWidth = 252, guiHeight = 202, tabWidth = 28, tabHeight = 32,
+			borderWidthX = 8, borderWidthY = 17, tabOffsetX = 0, tabOffsetY = -12, innerWidth = 228, innerHeight = 158,
 			minDisplayColumn = (AchievementList.minDisplayColumn * achievementSize) - (10 * achievementSize),
 			minDisplayRow = (AchievementList.minDisplayRow * achievementSize) - (10 * achievementSize),
 			maxDisplayColumn = AchievementList.maxDisplayColumn * achievementSize,
@@ -89,9 +81,6 @@ public class GuiBetterAchievements extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) {
 		switch (button.id) {
-		case buttonOld:
-			mc.displayGuiScreen(new GuiAchievementsOld(prevScreen, statFileWriter));
-			break;
 		case buttonDone:
 			mc.displayGuiScreen(prevScreen);
 			break;
@@ -167,9 +156,8 @@ public class GuiBetterAchievements extends GuiScreen {
 			scale -= scaleJump;
 		}
 
-		boolean customScale = page instanceof ICustomScale;
-		float minZoom = customScale ? ((ICustomScale) page).getMinScale() : GuiBetterAchievements.minZoom;
-		float maxZoom = customScale ? ((ICustomScale) page).getMaxScale() : GuiBetterAchievements.maxZoom;
+		float minZoom = GuiBetterAchievements.minZoom;
+		float maxZoom = GuiBetterAchievements.maxZoom;
 		scale = MathHelper.clamp_float(scale, minZoom, maxZoom);
 
 		if (scale != prevScale) {
@@ -209,14 +197,7 @@ public class GuiBetterAchievements extends GuiScreen {
 		} else {
 			return;
 		}
-
-		if (achievement instanceof ICustomBackgroundColour) {
-			int colour = ((ICustomBackgroundColour) achievement).recolourBackground(brightness);
-			GlStateManager.color(((colour >> 16) & 255) / 255.0F, ((colour >> 8) & 255) / 255.0F,
-					(colour & 255) / 255.0F, 1.0F);
-		} else {
-			GlStateManager.color(brightness, brightness, brightness, 1.0F);
-		}
+		GlStateManager.color(brightness, brightness, brightness, 1.0F);
 		mc.getTextureManager().bindTexture(SPRITES);
 		GlStateManager.enableBlend();
 		if (special) {
@@ -227,25 +208,18 @@ public class GuiBetterAchievements extends GuiScreen {
 			this.drawTexturedModalRect(achievementXPos - achievementOffset, achievementYPos - achievementOffset,
 					achievementX, achievementY, achievementTextureSize, achievementTextureSize);
 		}
+		RenderItem renderItem = RenderHelper.getRenderItem();
+		if (!canUnlock) {
+			GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
+			renderItem.func_175039_a(false); // Render with colour
+		}
 
-		if (achievement instanceof ICustomIconRenderer) {
-			GlStateManager.pushMatrix();
-			((ICustomIconRenderer) achievement).renderIcon(achievementXPos, achievementYPos);
-			GlStateManager.popMatrix();
-		} else {
-			RenderItem renderItem = RenderHelper.getRenderItem();
-			if (!canUnlock) {
-				GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
-				renderItem.func_175039_a(false); // Render with colour
-			}
+		net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
+		GlStateManager.enableCull();
+		renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
 
-			net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
-			GlStateManager.enableCull();
-			renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
-
-			if (!canUnlock) {
-				renderItem.func_175039_a(true); // Render with colour
-			}
+		if (!canUnlock) {
+			renderItem.func_175039_a(true); // Render with colour
 		}
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GlStateManager.disableLighting();
@@ -254,20 +228,15 @@ public class GuiBetterAchievements extends GuiScreen {
 	private void drawAchievements(AchievementPage page, int mouseX, int mouseY) {
 		List<Achievement> achievements = new LinkedList<Achievement>(
 				AchievementRegistry.instance().getAchievements(page));
-		boolean customColours = page instanceof ICustomArrows;
-		int colourCantUnlock = !userColourOverride && customColours
-				? ((ICustomArrows) page).getColourForCantUnlockArrow()
-				: (GuiBetterAchievements.colourCantUnlockRainbow
-						? ColourHelper.getRainbowColour(GuiBetterAchievements.colourCantUnlockRainbowSettings)
-						: GuiBetterAchievements.colourCantUnlock);
-		int colourCanUnlock = !userColourOverride && customColours ? ((ICustomArrows) page).getColourForCanUnlockArrow()
-				: (GuiBetterAchievements.colourCanUnlockRainbow
-						? ColourHelper.getRainbowColour(GuiBetterAchievements.colourCanUnlockRainbowSettings)
-						: GuiBetterAchievements.colourCanUnlock);
-		int colourUnlocked = !userColourOverride && customColours ? ((ICustomArrows) page).getColourForUnlockedArrow()
-				: (GuiBetterAchievements.colourUnlockedRainbow
-						? ColourHelper.getRainbowColour(GuiBetterAchievements.colourUnlockedRainbowSettings)
-						: GuiBetterAchievements.colourUnlocked);
+		int colourCantUnlock = (GuiBetterAchievements.colourCantUnlockRainbow
+				? ColourHelper.getRainbowColour(GuiBetterAchievements.colourCantUnlockRainbowSettings)
+				: GuiBetterAchievements.colourCantUnlock);
+		int colourCanUnlock = (GuiBetterAchievements.colourCanUnlockRainbow
+				? ColourHelper.getRainbowColour(GuiBetterAchievements.colourCanUnlockRainbowSettings)
+				: GuiBetterAchievements.colourCanUnlock);
+		int colourUnlocked = (GuiBetterAchievements.colourUnlockedRainbow
+				? ColourHelper.getRainbowColour(GuiBetterAchievements.colourUnlockedRainbowSettings)
+				: GuiBetterAchievements.colourUnlocked);
 		Collections.reverse(achievements);
 		GlStateManager.pushMatrix();
 		float inverseScale = 1.0F / scale;
@@ -292,53 +261,46 @@ public class GuiBetterAchievements extends GuiScreen {
 		GlStateManager.disableLighting();
 		GlStateManager.enableRescaleNormal();
 		GlStateManager.enableColorMaterial();
-		if (page instanceof ICustomBackground) {
-			GlStateManager.pushMatrix();
-			((ICustomBackground) page).drawBackground(left, top, innerWidth + borderWidthX, innerHeight + borderWidthY,
-					zLevel, scale);
-			GlStateManager.popMatrix();
-		} else {
-			GlStateManager.pushMatrix();
-			float scaleInverse = 1.0F / scale;
-			GlStateManager.scale(scaleInverse, scaleInverse, 1.0F);
-			float scale = blockSize / this.scale;
-			int dragX = (xPos - minDisplayColumn) >> 4;
-			int dragY = (yPos - minDisplayRow) >> 4;
-			int antiJumpX = (xPos - minDisplayColumn) % 16;
-			int antiJumpY = (yPos - minDisplayRow) % 16;
-			// TODO: some smarter background gen
+		GlStateManager.pushMatrix();
+		float scaleInverse = 1.0F / scale;
+		GlStateManager.scale(scaleInverse, scaleInverse, 1.0F);
+		float scale = blockSize / this.scale;
+		int dragX = (xPos - minDisplayColumn) >> 4;
+		int dragY = (yPos - minDisplayRow) >> 4;
+		int antiJumpX = (xPos - minDisplayColumn) % 16;
+		int antiJumpY = (yPos - minDisplayRow) % 16;
+		// TODO: some smarter background gen
+		mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+		for (int y = 1; ((y * scale) - antiJumpY) < (innerHeight + borderWidthY); y++) {
+			float darkness = 0.7F - ((dragY + y) / 80.0F);
+			GL11.glColor4f(darkness, darkness, darkness, 1.0F);
 			mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-			for (int y = 1; ((y * scale) - antiJumpY) < (innerHeight + borderWidthY); y++) {
-				float darkness = 0.7F - ((dragY + y) / 80.0F);
-				GL11.glColor4f(darkness, darkness, darkness, 1.0F);
-				mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-				for (int x = 1; ((x * scale) - antiJumpX) < (innerWidth + borderWidthX); x++) {
-					random.setSeed(mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
-					int r = random.nextInt(1 + dragY + y) + ((dragY + y) / 2);
-					TextureAtlasSprite icon = RenderHelper.getIcon(Blocks.grass);
-					if (r == 40) {
-						if (random.nextInt(3) == 0) {
-							icon = RenderHelper.getIcon(Blocks.diamond_ore);
-						} else {
-							icon = RenderHelper.getIcon(Blocks.redstone_ore);
-						}
-					} else if (r == 20) {
-						icon = RenderHelper.getIcon(Blocks.iron_ore);
-					} else if (r == 12) {
-						icon = RenderHelper.getIcon(Blocks.coal_ore);
-					} else if (r > 60) {
-						icon = RenderHelper.getIcon(Blocks.bedrock);
-					} else if (r > 4) {
-						icon = RenderHelper.getIcon(Blocks.stone);
-					} else if (r > 0) {
-						icon = RenderHelper.getIcon(Blocks.dirt);
+			for (int x = 1; ((x * scale) - antiJumpX) < (innerWidth + borderWidthX); x++) {
+				random.setSeed(mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
+				int r = random.nextInt(1 + dragY + y) + ((dragY + y) / 2);
+				TextureAtlasSprite icon = RenderHelper.getIcon(Blocks.grass);
+				if (r == 40) {
+					if (random.nextInt(3) == 0) {
+						icon = RenderHelper.getIcon(Blocks.diamond_ore);
+					} else {
+						icon = RenderHelper.getIcon(Blocks.redstone_ore);
 					}
-					this.drawTexturedModalRect((x * blockSize) - antiJumpX, (y * blockSize) - antiJumpY, icon,
-							blockSize, blockSize);
+				} else if (r == 20) {
+					icon = RenderHelper.getIcon(Blocks.iron_ore);
+				} else if (r == 12) {
+					icon = RenderHelper.getIcon(Blocks.coal_ore);
+				} else if (r > 60) {
+					icon = RenderHelper.getIcon(Blocks.bedrock);
+				} else if (r > 4) {
+					icon = RenderHelper.getIcon(Blocks.stone);
+				} else if (r > 0) {
+					icon = RenderHelper.getIcon(Blocks.dirt);
 				}
+				this.drawTexturedModalRect((x * blockSize) - antiJumpX, (y * blockSize) - antiJumpY, icon, blockSize,
+						blockSize);
 			}
-			GlStateManager.popMatrix();
 		}
+		GlStateManager.popMatrix();
 		GlStateManager.enableDepth();
 		GlStateManager.depthFunc(GL11.GL_LEQUAL);
 	}
@@ -418,48 +380,44 @@ public class GuiBetterAchievements extends GuiScreen {
 		int tooltipX = mouseX + 12;
 		int tooltipY = mouseY - 4;
 
-		if (hoveredAchievement instanceof ICustomTooltip) {
-			((ICustomTooltip) hoveredAchievement).renderTooltip(mouseX, mouseY, statFileWriter);
-		} else {
-			String title = hoveredAchievement.getStatName().getUnformattedText();
-			String desc = hoveredAchievement.getDescription();
+		String title = hoveredAchievement.getStatName().getUnformattedText();
+		String desc = hoveredAchievement.getDescription();
 
-			int depth = statFileWriter.func_150874_c(hoveredAchievement);
-			boolean unlocked = statFileWriter.hasAchievementUnlocked(hoveredAchievement);
-			boolean canUnlock = statFileWriter.canUnlockAchievement(hoveredAchievement);
-			boolean special = hoveredAchievement.getSpecial();
-			int tooltipWidth = defaultTooltipWidth;
+		int depth = statFileWriter.func_150874_c(hoveredAchievement);
+		boolean unlocked = statFileWriter.hasAchievementUnlocked(hoveredAchievement);
+		boolean canUnlock = statFileWriter.canUnlockAchievement(hoveredAchievement);
+		boolean special = hoveredAchievement.getSpecial();
+		int tooltipWidth = defaultTooltipWidth;
 
-			if (!canUnlock) {
-				if (depth > 3) {
-					return;
-				} else {
-					desc = getChatComponentTranslation("achievement.requires",
-							hoveredAchievement.parentAchievement.getStatName());
-				}
-
-				if (depth == 3) {
-					title = I18n.format("achievement.unknown");
-				}
+		if (!canUnlock) {
+			if (depth > 3) {
+				return;
+			} else {
+				desc = getChatComponentTranslation("achievement.requires",
+						hoveredAchievement.parentAchievement.getStatName());
 			}
 
-			tooltipWidth = Math.max(fontRendererObj.getStringWidth(title), tooltipWidth);
-			int tooltipHeight = fontRendererObj.splitStringWidth(desc, tooltipWidth);
-
-			if (unlocked) {
-				tooltipHeight += lineSize;
+			if (depth == 3) {
+				title = I18n.format("achievement.unknown");
 			}
+		}
 
-			drawGradientRect(tooltipX - achievementTooltipOffset, tooltipY - achievementTooltipOffset,
-					tooltipX + tooltipWidth + achievementTooltipOffset,
-					tooltipY + tooltipHeight + achievementTooltipOffset + lineSize, -1073741824, -1073741824);
-			fontRendererObj.drawStringWithShadow(title, tooltipX, tooltipY,
-					canUnlock ? (special ? -128 : -1) : (special ? -8355776 : -8355712));
-			fontRendererObj.drawSplitString(desc, tooltipX, tooltipY + lineSize, tooltipWidth, -6250336);
-			if (unlocked) {
-				fontRendererObj.drawStringWithShadow(I18n.format("achievement.taken"), tooltipX,
-						tooltipY + tooltipHeight + 4, -7302913);
-			}
+		tooltipWidth = Math.max(fontRendererObj.getStringWidth(title), tooltipWidth);
+		int tooltipHeight = fontRendererObj.splitStringWidth(desc, tooltipWidth);
+
+		if (unlocked) {
+			tooltipHeight += lineSize;
+		}
+
+		drawGradientRect(tooltipX - achievementTooltipOffset, tooltipY - achievementTooltipOffset,
+				tooltipX + tooltipWidth + achievementTooltipOffset,
+				tooltipY + tooltipHeight + achievementTooltipOffset + lineSize, -1073741824, -1073741824);
+		fontRendererObj.drawStringWithShadow(title, tooltipX, tooltipY,
+				canUnlock ? (special ? -128 : -1) : (special ? -8355776 : -8355712));
+		fontRendererObj.drawSplitString(desc, tooltipX, tooltipY + lineSize, tooltipWidth, -6250336);
+		if (unlocked) {
+			fontRendererObj.drawStringWithShadow(I18n.format("achievement.taken"), tooltipX,
+					tooltipY + tooltipHeight + 4, -7302913);
 		}
 
 		hoveredAchievement = null;
@@ -540,16 +498,7 @@ public class GuiBetterAchievements extends GuiScreen {
 			return;
 		}
 		currentPage = onTab;
-		AchievementPage page = pages.get(currentPage);
-		if ((page instanceof ICustomScale) && ((ICustomScale) page).resetScaleOnLoad()) {
-			scale = ((ICustomScale) page).setScale();
-		}
-
-		if (page instanceof ICustomPosition) {
-			Achievement center = ((ICustomPosition) page).setPositionOnLoad();
-			xPos = (center.displayColumn * achievementSize) + (achievementSize * 3);
-			yPos = (center.displayRow * achievementSize) + achievementSize;
-		}
+		pages.get(currentPage);
 	}
 
 	private void handleMouseInput(int mouseX, int mouseY, AchievementPage page) {
@@ -611,16 +560,7 @@ public class GuiBetterAchievements extends GuiScreen {
 			tabsOffset = 0;
 		}
 
-		AchievementPage page = pages.get(currentPage);
-		if (page instanceof ICustomScale) {
-			scale = ((ICustomScale) page).setScale();
-		}
-
-		if (page instanceof ICustomPosition) {
-			Achievement center = ((ICustomPosition) page).setPositionOnLoad();
-			xPos = (center.displayColumn * achievementSize) + (achievementSize * 3);
-			yPos = (center.displayRow * achievementSize) + achievementSize;
-		}
+		pages.get(currentPage);
 	}
 
 	@Override
