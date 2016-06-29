@@ -435,6 +435,7 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private void drawPageIcon(AchievementPage page, int tabLeft, int tabTop) {
+
 		ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
 		if (itemStack != null) {
 			zLevel = 100.0F;
