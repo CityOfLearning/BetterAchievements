@@ -211,7 +211,7 @@ public class GuiBetterAchievements extends GuiScreen {
 		RenderItem renderItem = RenderHelper.getRenderItem();
 		if (!canUnlock) {
 			GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
-			renderItem.func_175039_a(false); // Render with colour
+			renderItem.isNotRenderingEffectsInGUI(false); // Render with colour
 		}
 
 		net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
@@ -219,7 +219,7 @@ public class GuiBetterAchievements extends GuiScreen {
 		renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
 
 		if (!canUnlock) {
-			renderItem.func_175039_a(true); // Render with colour
+			renderItem.isNotRenderingEffectsInGUI(true); // Render with colour
 		}
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GlStateManager.disableLighting();

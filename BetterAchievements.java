@@ -3,6 +3,7 @@ package com.dyn.betterachievements;
 import com.dyn.betterachievements.proxy.Proxy;
 import com.dyn.betterachievements.reference.MetaData;
 import com.dyn.betterachievements.reference.Reference;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
