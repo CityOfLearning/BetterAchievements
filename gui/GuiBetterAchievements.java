@@ -10,18 +10,25 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import com.dyn.achievements.achievement.AchievementPlus;
+import com.dyn.achievements.handlers.AchievementManager;
 import com.dyn.betterachievements.reference.Reference;
 import com.dyn.betterachievements.registry.AchievementRegistry;
 import com.dyn.betterachievements.util.ColourHelper;
 import com.dyn.betterachievements.util.RenderHelper;
+import com.rabbit.gui.utils.TextureHelper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -169,6 +176,17 @@ public class GuiBetterAchievements extends GuiScreen {
 			yPos -= (newScaledHeight - prevScaledHeight) / 2;
 		}
 	}
+	
+	public static void drawScaledTexturedRect(int x, int y, int z, int width, int height) {
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		renderer.pos(x + width, y + height, z).tex(1, 1).endVertex();
+		renderer.pos(x + width, y, z).tex(1, 0).endVertex();
+		renderer.pos(x, y, z).tex(0, 0).endVertex();
+		renderer.pos(x, y + height, z).tex(0, 1).endVertex();
+		tessellator.draw();
+	}
 
 	private void drawAchievement(Achievement achievement) {
 		int achievementXPos = (achievement.displayColumn * achievementSize) - xPos;
@@ -208,19 +226,44 @@ public class GuiBetterAchievements extends GuiScreen {
 			this.drawTexturedModalRect(achievementXPos - achievementOffset, achievementYPos - achievementOffset,
 					achievementX, achievementY, achievementTextureSize, achievementTextureSize);
 		}
-		RenderItem renderItem = RenderHelper.getRenderItem();
-		if (!canUnlock) {
-			GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
-			renderItem.isNotRenderingEffectsInGUI(false); // Render with colour
+		if (achievement instanceof AchievementPlus) {
+			if (!canUnlock) {
+				GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
+				// Render with colour
+			}
+			GlStateManager.pushMatrix();
+			TextureHelper.bindTexture(((AchievementPlus) achievement).getTextureId());
+	        GlStateManager.enableRescaleNormal();
+	        GlStateManager.enableAlpha();
+	        GlStateManager.alphaFunc(516, 0.1F);
+	        GlStateManager.enableBlend();
+	        GlStateManager.blendFunc(770, 771);
+	        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	        drawScaledTexturedRect(achievementXPos + 3, achievementYPos + 3, 50, 16, 16);
+	        GlStateManager.disableAlpha();
+	        GlStateManager.disableRescaleNormal();
+	        GlStateManager.disableBlend();
+//	        GlStateManager.disableLighting();
+	        GlStateManager.popMatrix();
+			
+		} else {
+			RenderItem renderItem = RenderHelper.getRenderItem();
+			if (!canUnlock) {
+				GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
+				renderItem.isNotRenderingEffectsInGUI(false); 
+				// Render with colour
+			}
+
+			net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
+			GlStateManager.enableCull();
+			renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
+
+			if (!canUnlock) {
+				renderItem.isNotRenderingEffectsInGUI(true); 
+				// Render with colour
+			}
 		}
 
-		net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
-		GlStateManager.enableCull();
-		renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
-
-		if (!canUnlock) {
-			renderItem.isNotRenderingEffectsInGUI(true); // Render with colour
-		}
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GlStateManager.disableLighting();
 	}
@@ -242,15 +285,18 @@ public class GuiBetterAchievements extends GuiScreen {
 		float inverseScale = 1.0F / scale;
 		GlStateManager.scale(inverseScale, inverseScale, 1.0F);
 		for (Achievement achievement : achievements) {
-			if ((achievement.parentAchievement != null) && achievements.contains(achievement.parentAchievement)) {
+			if (achievement != null && (achievement.parentAchievement != null) && achievements.contains(achievement.parentAchievement)) {
 				drawArrow(achievement, colourCantUnlock, colourCanUnlock, colourUnlocked);
 			}
 		}
 		for (Achievement achievement : achievements) {
-			drawAchievement(achievement);
-			if (onAchievement(achievement, mouseX, mouseY)) {
-				hoveredAchievement = achievement;
+			if(achievement != null){
+				drawAchievement(achievement);
+				if (onAchievement(achievement, mouseX, mouseY)) {
+					hoveredAchievement = achievement;
+				}
 			}
+			
 		}
 		GlStateManager.popMatrix();
 	}
@@ -436,18 +482,38 @@ public class GuiBetterAchievements extends GuiScreen {
 
 	private void drawPageIcon(AchievementPage page, int tabLeft, int tabTop) {
 
-		ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
-		if (itemStack != null) {
-			zLevel = 100.0F;
-			itemRender.zLevel = 100.0F;
-			net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
-			GlStateManager.enableRescaleNormal();
-			itemRender.renderItemAndEffectIntoGUI(itemStack, tabLeft + 6, tabTop + 9);
-			itemRender.zLevel = 0.0F;
-			GlStateManager.disableLighting();
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			zLevel = 0.0F;
+		if(AchievementManager.getAchievementPageTextures().containsKey(page.getName())){
+			GlStateManager.pushMatrix();
+			
+			//TODO: need to make a map of all page textures from DB
+			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
+			
+	        GlStateManager.enableRescaleNormal();
+	        GlStateManager.enableAlpha();
+	        GlStateManager.alphaFunc(516, 0.1F);
+	        GlStateManager.enableBlend();
+	        GlStateManager.blendFunc(770, 771);
+	        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	        drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
+	        GlStateManager.disableAlpha();
+	        GlStateManager.disableRescaleNormal();
+	        GlStateManager.disableLighting();
+	        GlStateManager.popMatrix();
+		} else {
+			ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
+			if (itemStack != null) {
+				zLevel = 100.0F;
+				itemRender.zLevel = 100.0F;
+				net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
+				GlStateManager.enableRescaleNormal();
+				itemRender.renderItemAndEffectIntoGUI(itemStack, tabLeft + 6, tabTop + 9);
+				itemRender.zLevel = 0.0F;
+				GlStateManager.disableLighting();
+				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				zLevel = 0.0F;
+			}
 		}
+		GlStateManager.resetColor();
 	}
 
 	@Override
