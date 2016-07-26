@@ -481,10 +481,11 @@ public class GuiBetterAchievements extends GuiScreen {
 
 	private void drawPageIcon(AchievementPage page, int tabLeft, int tabTop) {
 
-		if (AchievementManager.getAchievementPageTextures().containsKey(page.getName())) {
+		if (AchievementManager.getAchievementPageTextures().containsKey(page) && AchievementManager.getAchievementPageTextures().get(page) != null) {
 			GlStateManager.pushMatrix();
 
 			// TODO: need to make a map of all page textures from DB
+//			AchievementManager.getAchievementPageTextures().get(page)
 			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
 
 			GlStateManager.enableRescaleNormal();
@@ -498,7 +499,22 @@ public class GuiBetterAchievements extends GuiScreen {
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.disableLighting();
 			GlStateManager.popMatrix();
-		} else {
+		} else if(page.getAchievements().size() > 0 && page.getAchievements().get(0) instanceof AchievementPlus){
+			GlStateManager.pushMatrix();
+			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
+
+			GlStateManager.enableRescaleNormal();
+			GlStateManager.enableAlpha();
+			GlStateManager.alphaFunc(516, 0.1F);
+			GlStateManager.enableBlend();
+			GlStateManager.blendFunc(770, 771);
+			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
+			GlStateManager.disableAlpha();
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.disableLighting();
+			GlStateManager.popMatrix();
+		}	else {
 			ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
 			if (itemStack != null) {
 				zLevel = 100.0F;
