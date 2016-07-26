@@ -20,11 +20,11 @@ import com.rabbit.gui.utils.TextureHelper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -67,6 +67,18 @@ public class GuiBetterAchievements extends GuiScreen {
 	public static float[] colourUnlockedRainbowSettings, colourCanUnlockRainbowSettings,
 			colourCantUnlockRainbowSettings;
 	private static int lastPage = 0;
+
+	public static void drawScaledTexturedRect(int x, int y, int z, int width, int height) {
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		renderer.pos(x + width, y + height, z).tex(1, 1).endVertex();
+		renderer.pos(x + width, y, z).tex(1, 0).endVertex();
+		renderer.pos(x, y, z).tex(0, 0).endVertex();
+		renderer.pos(x, y + height, z).tex(0, 1).endVertex();
+		tessellator.draw();
+	}
+
 	private GuiScreen prevScreen;
 	private StatFileWriter statFileWriter;
 	private int top, left;
@@ -76,6 +88,7 @@ public class GuiBetterAchievements extends GuiScreen {
 	private List<AchievementPage> pages;
 	private int currentPage, tabsOffset;
 	private int xPos, yPos;
+
 	private Achievement hoveredAchievement;
 
 	public GuiBetterAchievements(GuiScreen currentScreen, int page) {
@@ -176,17 +189,6 @@ public class GuiBetterAchievements extends GuiScreen {
 			yPos -= (newScaledHeight - prevScaledHeight) / 2;
 		}
 	}
-	
-	public static void drawScaledTexturedRect(int x, int y, int z, int width, int height) {
-		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer renderer = tessellator.getWorldRenderer();
-		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		renderer.pos(x + width, y + height, z).tex(1, 1).endVertex();
-		renderer.pos(x + width, y, z).tex(1, 0).endVertex();
-		renderer.pos(x, y, z).tex(0, 0).endVertex();
-		renderer.pos(x, y + height, z).tex(0, 1).endVertex();
-		tessellator.draw();
-	}
 
 	private void drawAchievement(Achievement achievement) {
 		int achievementXPos = (achievement.displayColumn * achievementSize) - xPos;
@@ -233,24 +235,24 @@ public class GuiBetterAchievements extends GuiScreen {
 			}
 			GlStateManager.pushMatrix();
 			TextureHelper.bindTexture(((AchievementPlus) achievement).getTextureId());
-	        GlStateManager.enableRescaleNormal();
-	        GlStateManager.enableAlpha();
-	        GlStateManager.alphaFunc(516, 0.1F);
-	        GlStateManager.enableBlend();
-	        GlStateManager.blendFunc(770, 771);
-	        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-	        drawScaledTexturedRect(achievementXPos + 3, achievementYPos + 3, 50, 16, 16);
-	        GlStateManager.disableAlpha();
-	        GlStateManager.disableRescaleNormal();
-	        GlStateManager.disableBlend();
-//	        GlStateManager.disableLighting();
-	        GlStateManager.popMatrix();
-			
+			GlStateManager.enableRescaleNormal();
+			GlStateManager.enableAlpha();
+			GlStateManager.alphaFunc(516, 0.1F);
+			GlStateManager.enableBlend();
+			GlStateManager.blendFunc(770, 771);
+			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			drawScaledTexturedRect(achievementXPos + 3, achievementYPos + 3, 50, 16, 16);
+			GlStateManager.disableAlpha();
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.disableBlend();
+			// GlStateManager.disableLighting();
+			GlStateManager.popMatrix();
+
 		} else {
 			RenderItem renderItem = RenderHelper.getRenderItem();
 			if (!canUnlock) {
 				GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
-				renderItem.isNotRenderingEffectsInGUI(false); 
+				renderItem.isNotRenderingEffectsInGUI(false);
 				// Render with colour
 			}
 
@@ -259,7 +261,7 @@ public class GuiBetterAchievements extends GuiScreen {
 			renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
 
 			if (!canUnlock) {
-				renderItem.isNotRenderingEffectsInGUI(true); 
+				renderItem.isNotRenderingEffectsInGUI(true);
 				// Render with colour
 			}
 		}
@@ -285,24 +287,25 @@ public class GuiBetterAchievements extends GuiScreen {
 		float inverseScale = 1.0F / scale;
 		GlStateManager.scale(inverseScale, inverseScale, 1.0F);
 		for (Achievement achievement : achievements) {
-			if (achievement != null && (achievement.parentAchievement != null) && achievements.contains(achievement.parentAchievement)) {
+			if ((achievement != null) && (achievement.parentAchievement != null)
+					&& achievements.contains(achievement.parentAchievement)) {
 				drawArrow(achievement, colourCantUnlock, colourCanUnlock, colourUnlocked);
 			}
 		}
 		for (Achievement achievement : achievements) {
-			if(achievement != null){
+			if (achievement != null) {
 				drawAchievement(achievement);
 				if (onAchievement(achievement, mouseX, mouseY)) {
 					hoveredAchievement = achievement;
 				}
 			}
-			
+
 		}
 		GlStateManager.popMatrix();
 	}
 
 	private void drawAchievementsBackground(AchievementPage page) {
-		GL11.glTranslatef(left, top + borderWidthY, -200.0F);
+		GlStateManager.translate(left, top + borderWidthY, -200.0F);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableLighting();
 		GlStateManager.enableRescaleNormal();
@@ -352,12 +355,8 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private void drawArrow(Achievement achievement, int colourCantUnlock, int colourCanUnlock, int colourUnlocked) {
-		int depth = statFileWriter.func_150874_c(achievement); // How far
-																// is the
-																// nearest
-																// unlocked
-																// parent
-
+		int depth = statFileWriter.func_150874_c(achievement);
+		// How far is the nearest unlocked parent
 		if (depth < 5) {
 			int achievementXPos = ((achievement.displayColumn * achievementSize) - xPos) + (achievementInnerSize / 2);
 			int achievementYPos = ((achievement.displayRow * achievementSize) - yPos) + (achievementInnerSize / 2);
@@ -482,23 +481,23 @@ public class GuiBetterAchievements extends GuiScreen {
 
 	private void drawPageIcon(AchievementPage page, int tabLeft, int tabTop) {
 
-		if(AchievementManager.getAchievementPageTextures().containsKey(page.getName())){
+		if (AchievementManager.getAchievementPageTextures().containsKey(page.getName())) {
 			GlStateManager.pushMatrix();
-			
-			//TODO: need to make a map of all page textures from DB
+
+			// TODO: need to make a map of all page textures from DB
 			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
-			
-	        GlStateManager.enableRescaleNormal();
-	        GlStateManager.enableAlpha();
-	        GlStateManager.alphaFunc(516, 0.1F);
-	        GlStateManager.enableBlend();
-	        GlStateManager.blendFunc(770, 771);
-	        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-	        drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
-	        GlStateManager.disableAlpha();
-	        GlStateManager.disableRescaleNormal();
-	        GlStateManager.disableLighting();
-	        GlStateManager.popMatrix();
+
+			GlStateManager.enableRescaleNormal();
+			GlStateManager.enableAlpha();
+			GlStateManager.alphaFunc(516, 0.1F);
+			GlStateManager.enableBlend();
+			GlStateManager.blendFunc(770, 771);
+			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
+			GlStateManager.disableAlpha();
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.disableLighting();
+			GlStateManager.popMatrix();
 		} else {
 			ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
 			if (itemStack != null) {
@@ -522,8 +521,8 @@ public class GuiBetterAchievements extends GuiScreen {
 		AchievementPage page = pages.get(currentPage);
 		this.handleMouseInput(mouseX, mouseY, page);
 		drawUnselectedTabs(page);
-		GlStateManager.depthFunc(GL11.GL_GEQUAL);
 		GlStateManager.pushMatrix();
+		GlStateManager.depthFunc(GL11.GL_GEQUAL);
 		drawAchievementsBackground(page);
 		drawAchievements(page, mouseX, mouseY);
 		GlStateManager.popMatrix();
@@ -602,15 +601,12 @@ public class GuiBetterAchievements extends GuiScreen {
 		left = (width - guiWidth) / 2;
 		top = (height - guiHeight) / 2;
 		scale = 1.0F;
-		xPos = achievementSize * 3;
-		yPos = achievementSize;
+		xPos = prevScreen instanceof GuiIngameMenu ? achievementSize * 3 : achievementSize * -4;
+		yPos = (int) (prevScreen instanceof GuiIngameMenu ? achievementSize : -3.5 * achievementSize);
 
 		buttonList.clear();
 		buttonList.add(new GuiButton(buttonDone, (width / 2) + buttonOffsetX, (height / 2) + buttonOffsetY, 80, 20,
 				I18n.format("gui.done")));
-		// this.buttonList.add(new GuiButton(buttonOld, this.left +
-		// buttonOffsetX, this.height / 2 + buttonOffsetY, 125, 20,
-		// I18n.format("com.dyn.betterachievements.gui.old")));
 
 		hoveredAchievement = null;
 		pages = AchievementRegistry.instance().getAllPages();
