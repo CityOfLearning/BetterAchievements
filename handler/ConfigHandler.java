@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dyn.betterachievements.gui.GuiBetterAchievements;
-import com.dyn.betterachievements.reference.Reference;
-import com.dyn.betterachievements.registry.AchievementRegistry;
 import com.dyn.betterachievements.util.ColourHelper;
 
 import net.minecraft.util.StatCollector;
@@ -14,8 +12,6 @@ import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.config.IConfigElement;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ConfigHandler {
 	public static Configuration config;
@@ -83,36 +79,8 @@ public class ConfigHandler {
 		prop.setLanguageKey("com.dyn.betterachievements.config.userColourOverride");
 		GuiBetterAchievements.userColourOverride = prop.getBoolean();
 
-		prop = config.get(Configuration.CATEGORY_GENERAL, "iconReset", false);
-		prop.comment = StatCollector.translateToLocal("com.dyn.betterachievements.config.iconReset.desc");
-		prop.setLanguageKey("com.dyn.betterachievements.config.iconReset");
-		GuiBetterAchievements.iconReset = prop.getBoolean();
-
-		prop = config.get(Configuration.CATEGORY_GENERAL, "listTabIcons", new String[0]);
-		prop.comment = StatCollector.translateToLocal("com.dyn.betterachievements.config.listTabIcons.desc");
-		prop.setLanguageKey("com.dyn.betterachievements.config.listTabIcons");
-		SaveHandler.userSetIcons = prop.getStringList();
-
 		if (config.hasChanged()) {
 			config.save();
-		}
-	}
-
-	public static void saveUserSetIcons() {
-		SaveHandler.userSetIcons = AchievementRegistry.instance().dumpUserSetIcons();
-
-		Property prop = config.get(Configuration.CATEGORY_GENERAL, "listTabIcons", new String[0]);
-		prop.comment = StatCollector.translateToLocal("com.dyn.betterachievements.config.listTabIcons.desc");
-		prop.setLanguageKey("com.dyn.betterachievements.config.listTabIcons");
-		prop.set(SaveHandler.userSetIcons);
-
-		config.save();
-	}
-
-	@SubscribeEvent
-	public void onConfigChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.modID.equalsIgnoreCase(Reference.MOD_ID)) {
-			loadConfig();
 		}
 	}
 }

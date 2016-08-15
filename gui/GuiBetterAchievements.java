@@ -62,24 +62,14 @@ public class GuiBetterAchievements extends GuiScreen {
 	private static final float scaleJump = 0.25F, minZoom = 1.0F, maxZoom = 2.0F;
 	private static final Random random = new Random();
 	public static int colourUnlocked, colourCanUnlock, colourCantUnlock;
-	public static boolean scrollButtons, iconReset, userColourOverride, colourUnlockedRainbow, colourCanUnlockRainbow,
+	public static boolean scrollButtons = true, userColourOverride, colourUnlockedRainbow, colourCanUnlockRainbow,
 			colourCantUnlockRainbow;
 	public static float[] colourUnlockedRainbowSettings, colourCanUnlockRainbowSettings,
 			colourCantUnlockRainbowSettings;
 	private static int lastPage = 0;
 
-	public static void drawScaledTexturedRect(int x, int y, int z, int width, int height) {
-		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer renderer = tessellator.getWorldRenderer();
-		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		renderer.pos(x + width, y + height, z).tex(1, 1).endVertex();
-		renderer.pos(x + width, y, z).tex(1, 0).endVertex();
-		renderer.pos(x, y, z).tex(0, 0).endVertex();
-		renderer.pos(x, y + height, z).tex(0, 1).endVertex();
-		tessellator.draw();
-	}
-
 	private GuiScreen prevScreen;
+
 	private StatFileWriter statFileWriter;
 	private int top, left;
 	private float scale;
@@ -88,7 +78,6 @@ public class GuiBetterAchievements extends GuiScreen {
 	private List<AchievementPage> pages;
 	private int currentPage, tabsOffset;
 	private int xPos, yPos;
-
 	private Achievement hoveredAchievement;
 
 	public GuiBetterAchievements(GuiScreen currentScreen, int page) {
@@ -417,11 +406,6 @@ public class GuiBetterAchievements extends GuiScreen {
 			return;
 		}
 
-		if (iconReset && Mouse.isButtonDown(2)) {
-			AchievementRegistry.instance().registerIcon(pages.get(currentPage).getName(),
-					hoveredAchievement.theItemStack, true);
-		}
-
 		int tooltipX = mouseX + 12;
 		int tooltipY = mouseY - 4;
 
@@ -481,11 +465,25 @@ public class GuiBetterAchievements extends GuiScreen {
 
 	private void drawPageIcon(AchievementPage page, int tabLeft, int tabTop) {
 
-		if (AchievementManager.getAchievementPageTextures().containsKey(page) && AchievementManager.getAchievementPageTextures().get(page) != null) {
+		if (AchievementManager.getAchievementPageTextures().containsKey(page)
+				&& (AchievementManager.getAchievementPageTexture(page) != null)) {
 			GlStateManager.pushMatrix();
 
-			// TODO: need to make a map of all page textures from DB
-//			AchievementManager.getAchievementPageTextures().get(page)
+			TextureHelper.bindTexture(AchievementManager.getAchievementPageTexture(page));
+
+			GlStateManager.enableRescaleNormal();
+			GlStateManager.enableAlpha();
+			GlStateManager.alphaFunc(516, 0.1F);
+			GlStateManager.enableBlend();
+			GlStateManager.blendFunc(770, 771);
+			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
+			GlStateManager.disableAlpha();
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.disableLighting();
+			GlStateManager.popMatrix();
+		} else if ((page.getAchievements().size() > 0) && (page.getAchievements().get(0) instanceof AchievementPlus)) {
+			GlStateManager.pushMatrix();
 			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
 
 			GlStateManager.enableRescaleNormal();
@@ -499,22 +497,7 @@ public class GuiBetterAchievements extends GuiScreen {
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.disableLighting();
 			GlStateManager.popMatrix();
-		} else if(page.getAchievements().size() > 0 && page.getAchievements().get(0) instanceof AchievementPlus){
-			GlStateManager.pushMatrix();
-			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
-
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.enableAlpha();
-			GlStateManager.alphaFunc(516, 0.1F);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFunc(770, 771);
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
-			GlStateManager.disableAlpha();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableLighting();
-			GlStateManager.popMatrix();
-		}	else {
+		} else {
 			ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
 			if (itemStack != null) {
 				zLevel = 100.0F;
@@ -529,6 +512,17 @@ public class GuiBetterAchievements extends GuiScreen {
 			}
 		}
 		GlStateManager.resetColor();
+	}
+
+	private void drawScaledTexturedRect(int x, int y, int z, int width, int height) {
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		renderer.pos(x + width, y + height, z).tex(1, 1).endVertex();
+		renderer.pos(x + width, y, z).tex(1, 0).endVertex();
+		renderer.pos(x, y, z).tex(0, 0).endVertex();
+		renderer.pos(x, y + height, z).tex(0, 1).endVertex();
+		tessellator.draw();
 	}
 
 	@Override
@@ -626,7 +620,7 @@ public class GuiBetterAchievements extends GuiScreen {
 
 		hoveredAchievement = null;
 		pages = AchievementRegistry.instance().getAllPages();
-		if (pages.size() > maxTabs) {
+		if (pages.size() < maxTabs) {
 			scrollButtons = false;
 		}
 		if (scrollButtons) {

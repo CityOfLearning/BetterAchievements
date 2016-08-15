@@ -5,18 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.dyn.DYNServerMod;
-
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.Achievement;
 import net.minecraft.stats.AchievementList;
 import net.minecraftforge.common.AchievementPage;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public final class AchievementRegistry {
 	private static AchievementRegistry instance;
@@ -110,51 +103,5 @@ public final class AchievementRegistry {
 		iconMap.put(mcPage.getName(), new ItemStack(Blocks.grass));
 		iconMap.putAll(userSetIcons);
 		firstLoad = false;
-	}
-
-	public void registerIcon(String pageName, ItemStack itemStack, boolean userSet) {
-		iconMap.put(pageName, itemStack);
-		if (userSet) {
-			userSetIcons.put(pageName, itemStack);
-		}
-	}
-
-	public void setUserSetIcons(String[] array) {
-		int i = 0;
-		for (String entry : array) {
-			String[] split = entry.split("->");
-			if (split.length != 2) {
-				continue;
-			}
-			String[] itemSplit = split[1].split(":", 4);
-			if (itemSplit.length < 2) {
-				continue;
-			}
-			Item item = GameRegistry.findItem(itemSplit[0], itemSplit[1]);
-			int meta = 0;
-			try {
-				meta = itemSplit.length > 2 ? Integer.parseInt(itemSplit[2]) : 0;
-			} catch (NumberFormatException e) {
-				DYNServerMod.logger.error("Invalid input for meta data on entry " + i);
-			}
-			NBTTagCompound nbtTag = null;
-			try {
-				nbtTag = (itemSplit.length > 3) && !itemSplit[3].equals("") ? JsonToNBT.getTagFromJson(itemSplit[3])
-						: null;
-			} catch (NBTException e) {
-				DYNServerMod.logger.error("Invalid input for nbt data on entry " + i);
-			}
-			ItemStack itemStack = null;
-			if (item != null) {
-				itemStack = new ItemStack(item, 0, meta);
-			}
-			if (itemStack != null) {
-				if (nbtTag != null) {
-					itemStack.setTagCompound(nbtTag);
-				}
-				userSetIcons.put(split[0], itemStack);
-			}
-			i++;
-		}
 	}
 }
