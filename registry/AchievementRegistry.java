@@ -25,7 +25,6 @@ public final class AchievementRegistry {
 	private List<Achievement> mcAchievements;
 	private Map<String, Achievement> statIdMap;
 	private Map<String, ItemStack> iconMap;
-	private Map<String, ItemStack> userSetIcons;
 
 	private boolean firstLoad;
 
@@ -34,19 +33,6 @@ public final class AchievementRegistry {
 		mcAchievements = new LinkedList<Achievement>();
 		iconMap = new LinkedHashMap<String, ItemStack>();
 		statIdMap = new LinkedHashMap<String, Achievement>();
-		userSetIcons = new LinkedHashMap<String, ItemStack>();
-	}
-
-	public String[] dumpUserSetIcons() {
-		List<String> list = new LinkedList<String>();
-		for (Map.Entry<String, ItemStack> entry : userSetIcons.entrySet()) {
-			String pageName = entry.getKey();
-			ItemStack itemStack = entry.getValue();
-			String itemName = itemStack.getItem().getRegistryName();
-			String nbtCompoundTag = itemStack.hasTagCompound() ? itemStack.getTagCompound().toString() : "";
-			list.add(pageName + "->" + itemName + ":" + entry.getValue().getItemDamage() + ":" + nbtCompoundTag);
-		}
-		return list.toArray(new String[list.size()]);
 	}
 
 	public Achievement getAchievement(String statId) {
@@ -101,7 +87,6 @@ public final class AchievementRegistry {
 			}
 		}
 		iconMap.put(mcPage.getName(), new ItemStack(Blocks.grass));
-		iconMap.putAll(userSetIcons);
 		firstLoad = false;
 	}
 }

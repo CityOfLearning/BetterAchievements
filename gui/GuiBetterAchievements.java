@@ -15,14 +15,15 @@ import com.dyn.achievements.handlers.AchievementManager;
 import com.dyn.betterachievements.reference.Reference;
 import com.dyn.betterachievements.registry.AchievementRegistry;
 import com.dyn.betterachievements.util.ColourHelper;
-import com.dyn.betterachievements.util.RenderHelper;
 import com.rabbit.gui.utils.TextureHelper;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -68,8 +69,16 @@ public class GuiBetterAchievements extends GuiScreen {
 			colourCantUnlockRainbowSettings;
 	private static int lastPage = 0;
 
-	private GuiScreen prevScreen;
+	public static TextureAtlasSprite getIcon(Block block) {
+		return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes()
+				.getTexture(block.getDefaultState());
+	}
 
+	public static RenderItem getRenderItem() {
+		return Minecraft.getMinecraft().getRenderItem();
+	}
+
+	private GuiScreen prevScreen;
 	private StatFileWriter statFileWriter;
 	private int top, left;
 	private float scale;
@@ -77,7 +86,9 @@ public class GuiBetterAchievements extends GuiScreen {
 	private int prevMouseX, prevMouseY;
 	private List<AchievementPage> pages;
 	private int currentPage, tabsOffset;
+
 	private int xPos, yPos;
+
 	private Achievement hoveredAchievement;
 
 	public GuiBetterAchievements(GuiScreen currentScreen, int page) {
@@ -238,14 +249,14 @@ public class GuiBetterAchievements extends GuiScreen {
 			GlStateManager.popMatrix();
 
 		} else {
-			RenderItem renderItem = RenderHelper.getRenderItem();
+			RenderItem renderItem = getRenderItem();
 			if (!canUnlock) {
 				GlStateManager.color(0.1F, 0.1F, 0.1F, 1.0F);
 				renderItem.isNotRenderingEffectsInGUI(false);
 				// Render with colour
 			}
 
-			net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
+			RenderHelper.enableGUIStandardItemLighting();
 			GlStateManager.enableCull();
 			renderItem.renderItemAndEffectIntoGUI(achievement.theItemStack, achievementXPos + 3, achievementYPos + 3);
 
@@ -316,23 +327,23 @@ public class GuiBetterAchievements extends GuiScreen {
 			for (int x = 1; ((x * scale) - antiJumpX) < (innerWidth + borderWidthX); x++) {
 				random.setSeed(mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
 				int r = random.nextInt(1 + dragY + y) + ((dragY + y) / 2);
-				TextureAtlasSprite icon = RenderHelper.getIcon(Blocks.grass);
+				TextureAtlasSprite icon = getIcon(Blocks.grass);
 				if (r == 40) {
 					if (random.nextInt(3) == 0) {
-						icon = RenderHelper.getIcon(Blocks.diamond_ore);
+						icon = getIcon(Blocks.diamond_ore);
 					} else {
-						icon = RenderHelper.getIcon(Blocks.redstone_ore);
+						icon = getIcon(Blocks.redstone_ore);
 					}
 				} else if (r == 20) {
-					icon = RenderHelper.getIcon(Blocks.iron_ore);
+					icon = getIcon(Blocks.iron_ore);
 				} else if (r == 12) {
-					icon = RenderHelper.getIcon(Blocks.coal_ore);
+					icon = getIcon(Blocks.coal_ore);
 				} else if (r > 60) {
-					icon = RenderHelper.getIcon(Blocks.bedrock);
+					icon = getIcon(Blocks.bedrock);
 				} else if (r > 4) {
-					icon = RenderHelper.getIcon(Blocks.stone);
+					icon = getIcon(Blocks.stone);
 				} else if (r > 0) {
-					icon = RenderHelper.getIcon(Blocks.dirt);
+					icon = getIcon(Blocks.dirt);
 				}
 				this.drawTexturedModalRect((x * blockSize) - antiJumpX, (y * blockSize) - antiJumpY, icon, blockSize,
 						blockSize);
@@ -502,7 +513,7 @@ public class GuiBetterAchievements extends GuiScreen {
 			if (itemStack != null) {
 				zLevel = 100.0F;
 				itemRender.zLevel = 100.0F;
-				net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
+				RenderHelper.enableGUIStandardItemLighting();
 				GlStateManager.enableRescaleNormal();
 				itemRender.renderItemAndEffectIntoGUI(itemStack, tabLeft + 6, tabTop + 9);
 				itemRender.zLevel = 0.0F;
