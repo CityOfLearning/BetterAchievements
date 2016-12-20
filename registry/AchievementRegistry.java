@@ -30,9 +30,9 @@ public final class AchievementRegistry {
 
 	private AchievementRegistry() {
 		firstLoad = true;
-		mcAchievements = new LinkedList<Achievement>();
-		iconMap = new LinkedHashMap<String, ItemStack>();
-		statIdMap = new LinkedHashMap<String, Achievement>();
+		mcAchievements = new LinkedList<>();
+		iconMap = new LinkedHashMap<>();
+		statIdMap = new LinkedHashMap<>();
 	}
 
 	public Achievement getAchievement(String statId) {
@@ -50,7 +50,7 @@ public final class AchievementRegistry {
 		if (firstLoad) {
 			init();
 		}
-		List<AchievementPage> pages = new LinkedList<AchievementPage>();
+		List<AchievementPage> pages = new LinkedList<>();
 		pages.add(mcPage);
 		int size = AchievementPage.getAchievementPages().size();
 		for (int i = 0; i < size; i++) {

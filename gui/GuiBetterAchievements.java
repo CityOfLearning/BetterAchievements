@@ -271,8 +271,7 @@ public class GuiBetterAchievements extends GuiScreen {
 	}
 
 	private void drawAchievements(AchievementPage page, int mouseX, int mouseY) {
-		List<Achievement> achievements = new LinkedList<Achievement>(
-				AchievementRegistry.instance().getAchievements(page));
+		List<Achievement> achievements = new LinkedList<>(AchievementRegistry.instance().getAchievements(page));
 		int colourCantUnlock = (GuiBetterAchievements.colourCantUnlockRainbow
 				? ColourHelper.getRainbowColour(GuiBetterAchievements.colourCantUnlockRainbowSettings)
 				: GuiBetterAchievements.colourCantUnlock);
@@ -469,7 +468,7 @@ public class GuiBetterAchievements extends GuiScreen {
 			return;
 		}
 		AchievementPage page = pages.get(onTab);
-		List<String> tooltip = new LinkedList<String>();
+		List<String> tooltip = new LinkedList<>();
 		tooltip.add(page.getName());
 		this.drawHoveringText(tooltip, mouseX, mouseY, fontRendererObj);
 	}

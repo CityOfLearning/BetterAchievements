@@ -17,7 +17,7 @@ public class ConfigHandler {
 	public static Configuration config;
 
 	public static List<IConfigElement> getConfigElements() {
-		List<IConfigElement> list = new ArrayList<IConfigElement>();
+		List<IConfigElement> list = new ArrayList<>();
 		list.addAll(new ConfigElement(config.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements());
 		return list;
 	}
