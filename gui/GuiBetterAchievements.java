@@ -234,18 +234,22 @@ public class GuiBetterAchievements extends GuiScreen {
 				// Render with colour
 			}
 			GlStateManager.pushMatrix();
-			TextureHelper.bindTexture(((AchievementPlus) achievement).getTextureId());
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.enableAlpha();
-			GlStateManager.alphaFunc(516, 0.1F);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFunc(770, 771);
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			drawScaledTexturedRect(achievementXPos + 3, achievementYPos + 3, 50, 16, 16);
-			GlStateManager.disableAlpha();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableBlend();
-			// GlStateManager.disableLighting();
+			{
+				TextureHelper.bindTexture(((AchievementPlus) achievement).getTextureId());
+				GlStateManager.enableRescaleNormal();
+				GlStateManager.enableAlpha();
+				GlStateManager.alphaFunc(516, 0.1F);
+				GlStateManager.enableBlend();
+				GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				// GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA,
+				// GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+				GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+				drawScaledTexturedRect(achievementXPos + 3, achievementYPos + 3, 50, 16, 16);
+				GlStateManager.disableAlpha();
+				GlStateManager.disableRescaleNormal();
+				GlStateManager.disableBlend();
+				// GlStateManager.disableLighting();
+			}
 			GlStateManager.popMatrix();
 
 		} else {
@@ -283,22 +287,24 @@ public class GuiBetterAchievements extends GuiScreen {
 				: GuiBetterAchievements.colourUnlocked);
 		Collections.reverse(achievements);
 		GlStateManager.pushMatrix();
-		float inverseScale = 1.0F / scale;
-		GlStateManager.scale(inverseScale, inverseScale, 1.0F);
-		for (Achievement achievement : achievements) {
-			if ((achievement != null) && (achievement.parentAchievement != null)
-					&& achievements.contains(achievement.parentAchievement)) {
-				drawArrow(achievement, colourCantUnlock, colourCanUnlock, colourUnlocked);
-			}
-		}
-		for (Achievement achievement : achievements) {
-			if (achievement != null) {
-				drawAchievement(achievement);
-				if (onAchievement(achievement, mouseX, mouseY)) {
-					hoveredAchievement = achievement;
+		{
+			float inverseScale = 1.0F / scale;
+			GlStateManager.scale(inverseScale, inverseScale, 1.0F);
+			for (Achievement achievement : achievements) {
+				if ((achievement != null) && (achievement.parentAchievement != null)
+						&& achievements.contains(achievement.parentAchievement)) {
+					drawArrow(achievement, colourCantUnlock, colourCanUnlock, colourUnlocked);
 				}
 			}
+			for (Achievement achievement : achievements) {
+				if (achievement != null) {
+					drawAchievement(achievement);
+					if (onAchievement(achievement, mouseX, mouseY)) {
+						hoveredAchievement = achievement;
+					}
+				}
 
+			}
 		}
 		GlStateManager.popMatrix();
 	}
@@ -310,42 +316,44 @@ public class GuiBetterAchievements extends GuiScreen {
 		GlStateManager.enableRescaleNormal();
 		GlStateManager.enableColorMaterial();
 		GlStateManager.pushMatrix();
-		float scaleInverse = 1.0F / scale;
-		GlStateManager.scale(scaleInverse, scaleInverse, 1.0F);
-		float scale = blockSize / this.scale;
-		int dragX = (xPos - minDisplayColumn) >> 4;
-		int dragY = (yPos - minDisplayRow) >> 4;
-		int antiJumpX = (xPos - minDisplayColumn) % 16;
-		int antiJumpY = (yPos - minDisplayRow) % 16;
-		// TODO: some smarter background gen
-		mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-		for (int y = 1; ((y * scale) - antiJumpY) < (innerHeight + borderWidthY); y++) {
-			float darkness = 0.7F - ((dragY + y) / 80.0F);
-			GL11.glColor4f(darkness, darkness, darkness, 1.0F);
+		{
+			float scaleInverse = 1.0F / scale;
+			GlStateManager.scale(scaleInverse, scaleInverse, 1.0F);
+			float scale = blockSize / this.scale;
+			int dragX = (xPos - minDisplayColumn) >> 4;
+			int dragY = (yPos - minDisplayRow) >> 4;
+			int antiJumpX = (xPos - minDisplayColumn) % 16;
+			int antiJumpY = (yPos - minDisplayRow) % 16;
+			// TODO: some smarter background gen
 			mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-			for (int x = 1; ((x * scale) - antiJumpX) < (innerWidth + borderWidthX); x++) {
-				random.setSeed(mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
-				int r = random.nextInt(1 + dragY + y) + ((dragY + y) / 2);
-				TextureAtlasSprite icon = getIcon(Blocks.grass);
-				if (r == 40) {
-					if (random.nextInt(3) == 0) {
-						icon = getIcon(Blocks.diamond_ore);
-					} else {
-						icon = getIcon(Blocks.redstone_ore);
+			for (int y = 1; ((y * scale) - antiJumpY) < (innerHeight + borderWidthY); y++) {
+				float darkness = 0.7F - ((dragY + y) / 80.0F);
+				GlStateManager.color(darkness, darkness, darkness, 1.0F);
+				mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+				for (int x = 1; ((x * scale) - antiJumpX) < (innerWidth + borderWidthX); x++) {
+					random.setSeed(mc.getSession().getPlayerID().hashCode() + dragY + y + ((dragX + x) * 16));
+					int r = random.nextInt(1 + dragY + y) + ((dragY + y) / 2);
+					TextureAtlasSprite icon = getIcon(Blocks.grass);
+					if (r == 40) {
+						if (random.nextInt(3) == 0) {
+							icon = getIcon(Blocks.diamond_ore);
+						} else {
+							icon = getIcon(Blocks.redstone_ore);
+						}
+					} else if (r == 20) {
+						icon = getIcon(Blocks.iron_ore);
+					} else if (r == 12) {
+						icon = getIcon(Blocks.coal_ore);
+					} else if (r > 60) {
+						icon = getIcon(Blocks.bedrock);
+					} else if (r > 4) {
+						icon = getIcon(Blocks.stone);
+					} else if (r > 0) {
+						icon = getIcon(Blocks.dirt);
 					}
-				} else if (r == 20) {
-					icon = getIcon(Blocks.iron_ore);
-				} else if (r == 12) {
-					icon = getIcon(Blocks.coal_ore);
-				} else if (r > 60) {
-					icon = getIcon(Blocks.bedrock);
-				} else if (r > 4) {
-					icon = getIcon(Blocks.stone);
-				} else if (r > 0) {
-					icon = getIcon(Blocks.dirt);
+					this.drawTexturedModalRect((x * blockSize) - antiJumpX, (y * blockSize) - antiJumpY, icon,
+							blockSize, blockSize);
 				}
-				this.drawTexturedModalRect((x * blockSize) - antiJumpX, (y * blockSize) - antiJumpY, icon, blockSize,
-						blockSize);
 			}
 		}
 		GlStateManager.popMatrix();
@@ -478,34 +486,38 @@ public class GuiBetterAchievements extends GuiScreen {
 		if (AchievementManager.getAchievementPageTextures().containsKey(page)
 				&& (AchievementManager.getAchievementPageTexture(page) != null)) {
 			GlStateManager.pushMatrix();
+			{
 
-			TextureHelper.bindTexture(AchievementManager.getAchievementPageTexture(page));
+				TextureHelper.bindTexture(AchievementManager.getAchievementPageTexture(page));
 
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.enableAlpha();
-			GlStateManager.alphaFunc(516, 0.1F);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFunc(770, 771);
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
-			GlStateManager.disableAlpha();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableLighting();
+				GlStateManager.enableRescaleNormal();
+				GlStateManager.enableAlpha();
+				GlStateManager.alphaFunc(516, 0.1F);
+				GlStateManager.enableBlend();
+				GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+				drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
+				GlStateManager.disableAlpha();
+				GlStateManager.disableRescaleNormal();
+				GlStateManager.disableLighting();
+			}
 			GlStateManager.popMatrix();
 		} else if ((page.getAchievements().size() > 0) && (page.getAchievements().get(0) instanceof AchievementPlus)) {
 			GlStateManager.pushMatrix();
-			TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
+			{
+				TextureHelper.bindTexture(((AchievementPlus) page.getAchievements().get(0)).getTextureId());
 
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.enableAlpha();
-			GlStateManager.alphaFunc(516, 0.1F);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFunc(770, 771);
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
-			GlStateManager.disableAlpha();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableLighting();
+				GlStateManager.enableRescaleNormal();
+				GlStateManager.enableAlpha();
+				GlStateManager.alphaFunc(516, 0.1F);
+				GlStateManager.enableBlend();
+				GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+				drawScaledTexturedRect(tabLeft + 6, tabTop + 9, 100, 16, 16);
+				GlStateManager.disableAlpha();
+				GlStateManager.disableRescaleNormal();
+				GlStateManager.disableLighting();
+			}
 			GlStateManager.popMatrix();
 		} else {
 			ItemStack itemStack = AchievementRegistry.instance().getItemStack(page);
@@ -542,9 +554,11 @@ public class GuiBetterAchievements extends GuiScreen {
 		this.handleMouseInput(mouseX, mouseY, page);
 		drawUnselectedTabs(page);
 		GlStateManager.pushMatrix();
-		GlStateManager.depthFunc(GL11.GL_GEQUAL);
-		drawAchievementsBackground(page);
-		drawAchievements(page, mouseX, mouseY);
+		{
+			GlStateManager.depthFunc(GL11.GL_GEQUAL);
+			drawAchievementsBackground(page);
+			drawAchievements(page, mouseX, mouseY);
+		}
 		GlStateManager.popMatrix();
 		GlStateManager.enableBlend();
 		mc.getTextureManager().bindTexture(SPRITES);
